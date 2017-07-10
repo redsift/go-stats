@@ -33,32 +33,26 @@ func Init() {
 	parsed = true
 }
 
-func New(version string) stats.Collector {
+func New() stats.Collector {
 	if !parsed {
 		Init()
 	}
 
 	if ns := namespace; ns == "" {
 		fmt.Println("No stats collector specified, sinking to null")
-	} else {
-		tags := gtags
-		if ver := "version:" + version; len(tags) > 0 {
-			tags = append(tags, ver)
-		} else {
-			tags = []string{ver}
-		}
-
-		var err error
-		collector, err := stats.NewDogstatsD(host, port, ns, tags)
-		if err != nil {
-			fmt.Printf("Could not create DogstatsD collector: %s\n", err)
-			os.Exit(1)
-		}
-
-		return collector
+		return stats.NewNull()
 	}
 
-	return stats.NewNull()
+	tags := gtags
+
+	var err error
+	collector, err := stats.NewDogstatsD(host, port, ns, tags)
+	if err != nil {
+		fmt.Printf("Could not create DogstatsD collector: %s\n", err)
+		os.Exit(1)
+	}
+
+	return collector
 }
 
 type BeanspikeStats struct {
