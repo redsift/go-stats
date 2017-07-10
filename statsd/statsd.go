@@ -38,7 +38,7 @@ func New() stats.Collector {
 		Init()
 	}
 
-	if ns := namespace; ns == "" {
+	if namespace == "" {
 		fmt.Println("No stats collector specified, sinking to null")
 		return stats.NewNull()
 	}
@@ -46,7 +46,7 @@ func New() stats.Collector {
 	tags := gtags
 
 	var err error
-	collector, err := stats.NewDogstatsD(host, port, ns, tags)
+	collector, err := stats.NewDogstatsD(host, port, namespace, tags)
 	if err != nil {
 		fmt.Printf("Could not create DogstatsD collector: %s\n", err)
 		os.Exit(1)
