@@ -6,6 +6,7 @@ import (
 
 	"github.com/DataDog/dd-trace-go/tracer"
 	"github.com/pierrec/xxHash/xxHash64"
+	"github.com/redsift/go-rstid"
 )
 
 type Tracer struct {
@@ -16,8 +17,29 @@ type Tracer struct {
 // assigned and its trace id calculated from request id
 func (t *Tracer) NewRootSpan(name, service, resource string, reqID string) *tracer.Span {
 	span := t.Tracer.NewRootSpan(name, service, resource)
-	span.TraceID = xxHash64.Checksum([]byte(reqID), 0xCAFEBABE)
+	id := xxHash64.Checksum([]byte(reqID), 0xCAFEBABE)
+	span.TraceID = id
+	span.SpanID = id
 	return span
+}
+
+func (t *Tracer) NewRootSpanFromRSTID(id string) (*tracer.Span, error) {
+	service, reqID, span, resource, err := rstid.Decode(id)
+	if err != nil {
+		return nil, err
+	}
+	root := t.NewRootSpan(span, service, resource, reqID)
+	return root, nil
+}
+
+func (t *Tracer) NewChildSpanFromRSTID(id, name string) *tracer.Span {
+	parent, err := t.NewRootSpanFromRSTID(id)
+	if err != nil {
+		// they (github.com/DataDog/dd-trace-go/tracer) are defensive
+		// and create "untraceble" root span if parent is nil
+		parent = nil
+	}
+	return t.Tracer.NewChildSpan(name, parent)
 }
 
 // NewTracer create a new tracer.Tracer with transport configured to send traces to addr.

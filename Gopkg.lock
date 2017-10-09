@@ -39,6 +39,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/redsift/go-rstid"
+  packages = ["."]
+  revision = "590099579a67509394fa8da8f7d74534d6ae3257"
+
+[[projects]]
+  branch = "master"
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "54210f4e076c57f351166f0ed60e67d3fca57a36"
@@ -58,6 +64,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e30408fd84cd1152b842257e896d107ddc57242553e62c1a0832fd89d11efe75"
+  inputs-digest = "8d6f6d12072263ca982a97b202e3d5050aa7483e4d0062906be7aba0b217099e"
   solver-name = "gps-cdcl"
   solver-version = 1
