@@ -6,45 +6,49 @@ import (
 
 	"github.com/DataDog/dd-trace-go/tracer"
 	"github.com/pierrec/xxHash/xxHash64"
-	"github.com/redsift/go-rstid"
 )
 
 type Tracer struct {
 	*tracer.Tracer
 }
 
-// NewRootSpan creates a span with no parent. Its span id will be randomly
-// assigned and its trace id calculated from request id
-func (t *Tracer) NewRootSpan(name, service, resource string, reqID string) *tracer.Span {
-	span := t.Tracer.NewRootSpan(name, service, resource)
-	id := xxHash64.Checksum([]byte(reqID), 0xCAFEBABE)
+// AsTraceID is a pure function which converts string s to uint64.
+func AsTraceID(s string) uint64 {
+	return xxHash64.Checksum([]byte(s), 0xCAFEBABE)
+}
+
+// NewRootSpanWithID creates a span with no parent.
+// Its span and trace ids set to given id.
+func (t *Tracer) NewRootSpanWithID(op, service, resource string, id uint64) *tracer.Span {
+	span := t.Tracer.NewRootSpan(op, service, resource)
 	span.TraceID = id
 	span.SpanID = id
 	return span
 }
 
-func (t *Tracer) NewRootSpanFromRSTID(id string) (*tracer.Span, error) {
-	service, reqID, span, resource, err := rstid.Decode(id)
-	if err != nil {
-		return nil, err
-	}
-	root := t.NewRootSpan(span, service, resource, reqID)
-	return root, nil
+// NewRootSpan creates a span with no parent. Its span id will be randomly
+// assigned and its parent and trace ids set to given id.
+func (t *Tracer) NewRootSpanWithRemoteID(op, service, resource string, id uint64) *tracer.Span {
+	span := t.Tracer.NewRootSpan(op, service, resource)
+	span.TraceID = id
+	span.ParentID = id
+	return span
 }
 
-func (t *Tracer) NewChildSpanFromRSTID(id, name string) *tracer.Span {
-	parent, err := t.NewRootSpanFromRSTID(id)
-	if err != nil {
-		// they (github.com/DataDog/dd-trace-go/tracer) are defensive
-		// and create "untraceble" root span if parent is nil
-		parent = nil
+type TracerOption func(*Tracer)
+
+// SetMeta is an option for setting meta on tracer
+func SetMeta(tags map[string]string) TracerOption {
+	return func(t *Tracer) {
+		for k, v := range tags {
+			t.SetMeta(k, v)
+		}
 	}
-	return t.Tracer.NewChildSpan(name, parent)
 }
 
 // NewTracer create a new tracer.Tracer with transport configured to send traces to addr.
 // NewTracer assumes addr is "hostname:port" string, otherwise discard-all transport will be used.
-func NewTracer(addr string, tags map[string]string) *Tracer {
+func NewTracer(addr string, opts ...TracerOption) *Tracer {
 	h, p, err := net.SplitHostPort(addr)
 	var transport tracer.Transport
 	if err != nil {
@@ -53,8 +57,8 @@ func NewTracer(addr string, tags map[string]string) *Tracer {
 		transport = tracer.NewTransport(h, p)
 	}
 	t := &Tracer{tracer.NewTracerTransport(transport)}
-	for k, v := range tags {
-		t.SetMeta(k, v)
+	for _, opt := range opts {
+		opt(t)
 	}
 	return t
 }

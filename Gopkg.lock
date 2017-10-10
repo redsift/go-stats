@@ -41,7 +41,7 @@
   branch = "master"
   name = "github.com/redsift/go-rstid"
   packages = ["."]
-  revision = "590099579a67509394fa8da8f7d74534d6ae3257"
+  revision = "c64e01877551cce123e25712c83023b96a4ad91e"
 
 [[projects]]
   branch = "master"

@@ -1,1 +1,4 @@
-.idea
+vendor/
+_go-vendor-unpin/
+.idea/
+.vscode/
