@@ -37,8 +37,8 @@ func (t *Tracer) NewRootSpanWithRemoteID(op, service, resource string, id uint64
 
 type TracerOption func(*Tracer)
 
-// SetMeta is an option for setting meta on tracer
-func SetMeta(tags map[string]string) TracerOption {
+// WithMeta is an option for setting meta on tracer
+func WithMeta(tags map[string]string) TracerOption {
 	return func(t *Tracer) {
 		for k, v := range tags {
 			t.SetMeta(k, v)
