@@ -1,6 +1,7 @@
 package apm
 
 import (
+	"context"
 	"net"
 	"net/http"
 
@@ -61,6 +62,17 @@ func NewTracer(addr string, opts ...TracerOption) *Tracer {
 		opt(t)
 	}
 	return t
+}
+
+// NewChildSpanFromContext will create a child span of the span contained in
+// the given context. If the context contains no span, a span with
+// no service or resource will be returned.
+func NewChildSpanFromContext(name string, ctx context.Context) *tracer.Span {
+	span, _ := tracer.SpanFromContext(ctx)
+	if span == nil {
+		return tracer.DefaultTracer.NewChildSpan(name, span)
+	}
+	return span.Tracer().NewChildSpan(name, span)
 }
 
 type nullTransport struct{}
