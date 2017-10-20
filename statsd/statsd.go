@@ -10,6 +10,7 @@ package statsd
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/redsift/go-cfg"
 	"github.com/redsift/go-stats/stats"
@@ -17,36 +18,37 @@ import (
 
 const defaultPort = 8125
 
-var namespace string
-var host string
-var port int
-var gtags []string
+var (
+	namespace string
+	host      string
+	port      int
+	gtags     []string
+	once      sync.Once
+)
 
-var parsed bool
-
-func Init() {
+func configure() {
 	namespace = cfg.EnvString("STATSD_NAMESPACE", "")
 	host = cfg.EnvString("STATSD_HOST", "127.0.0.1")
 	port = cfg.EnvInt("STATSD_PORT", defaultPort)
 	gtags = cfg.EnvStringArray("STATSD_TAGS")
+}
 
-	parsed = true
+func Init() {
+	once.Do(configure)
 }
 
 func New() stats.Collector {
-	if !parsed {
-		Init()
-	}
+	once.Do(configure)
 
 	if namespace == "" {
 		fmt.Println("No stats collector specified, sinking to null")
-		return stats.NewNull()
+		return stats.NewDiscardCollector()
 	}
 
 	tags := gtags
 
 	var err error
-	collector, err := stats.NewDogstatsD(host, port, namespace, tags)
+	collector, err := stats.NewDogstatsD(host, port, namespace, tags...)
 	if err != nil {
 		fmt.Printf("Could not create DogstatsD collector: %s\n", err)
 		os.Exit(1)
@@ -60,7 +62,7 @@ type BeanspikeStats struct {
 }
 
 func (bsStats BeanspikeStats) Handler(event, tube string, count float64) {
-	bsStats.collector.Count(event, count, []string{tube})
+	bsStats.collector.Count(event, count, []string{tube}...)
 }
 
 func NewBeanspikeStats(collector stats.Collector) BeanspikeStats {

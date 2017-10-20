@@ -4,8 +4,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/PagerDuty/godspeed"
 	"github.com/redsift/go-errs"
+
+	"github.com/PagerDuty/godspeed"
 )
 
 const sendBuffer = 16
@@ -13,6 +14,7 @@ const sendBuffer = 16
 type dogstatsd struct {
 	send chan *statsd
 	ns   string
+	tags []string
 }
 
 type statsd struct {
@@ -35,18 +37,14 @@ type statsdEvent struct {
 	fields map[string]string
 }
 
-func NewDogstatsD(host string, port int, ns string, tags []string) (Collector, error) {
+func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
 	a, err := godspeed.New(host, port, false)
-
 	if err != nil {
 		return nil, err
 	}
 
 	a.SetNamespace(ns)
-
-	if len(tags) > 0 {
-		a.AddTags(tags)
-	}
+	a.AddTags(tags)
 
 	ch := make(chan *statsd, sendBuffer)
 
@@ -64,7 +62,7 @@ func NewDogstatsD(host string, port int, ns string, tags []string) (Collector, e
 		}
 	}()
 
-	return &dogstatsd{ch, ns}, nil
+	return &dogstatsd{ch, ns, tags}, nil
 }
 
 type EventLevel int
@@ -79,7 +77,7 @@ const (
 // aggregation : key to group events together. Events are aggregated on the Event Stream based on: hostname/level/source/aggregation
 // source : string to identify source
 // low : Low priority event
-func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation string, low bool, tags []string) {
+func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
 	fields := make(map[string]string)
 
 	switch level {
@@ -109,12 +107,16 @@ func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation str
 	d.send <- &statsd{nil, &statsdEvent{title, text, fields}, tags}
 }
 
-func (d *dogstatsd) Inform(title, text string, tags []string) {
-	d.event(Info, title, text, "", "", true, tags)
+func (d *dogstatsd) Inform(title, text string, tags ...string) {
+	d.event(Info, title, text, "", "", true, tags...)
 }
 
-func (d *dogstatsd) Error(pe *errs.PropagatedError, tags []string) {
-	if pe == nil {
+func (d *dogstatsd) Error(err error, tags ...string) {
+	if err == nil {
+		return
+	}
+	pe, ok := err.(*errs.PropagatedError)
+	if !ok {
 		return
 	}
 	title := pe.Code.String() + " / " + pe.Title + " / " + pe.Id
@@ -124,28 +126,31 @@ func (d *dogstatsd) Error(pe *errs.PropagatedError, tags []string) {
 		if src = pe.Source.Parameter; src == "" {
 			src = "jsonpointer:" + pe.Source.Pointer
 		}
-
 	}
 	agg := pe.Code.String()
-	d.event(Error, title, text, src, agg, false, tags)
+	d.event(Error, title, text, src, agg, false, tags...)
 }
 
-func (d *dogstatsd) Count(stat string, count float64, tags []string) {
+func (d *dogstatsd) Count(stat string, count float64, tags ...string) {
 	d.send <- &statsd{&statsdDatum{stat, "c", count, 1}, nil, tags}
 }
 
-func (d *dogstatsd) Gauge(stat string, value float64, tags []string) {
+func (d *dogstatsd) Gauge(stat string, value float64, tags ...string) {
 	d.send <- &statsd{&statsdDatum{stat, "g", value, 1}, nil, tags}
 }
 
-func (d *dogstatsd) Timing(stat string, value time.Duration, tags []string) {
+func (d *dogstatsd) Timing(stat string, value time.Duration, tags ...string) {
 	d.send <- &statsd{&statsdDatum{stat, "ms", float64(value) / float64(time.Millisecond), 1}, nil, tags}
 }
 
-func (d *dogstatsd) Histogram(stat string, value float64, tags []string) {
+func (d *dogstatsd) Histogram(stat string, value float64, tags ...string) {
 	d.send <- &statsd{&statsdDatum{stat, "h", value, 1}, nil, tags}
 }
 
 func (d *dogstatsd) Close() {
 	close(d.send)
+}
+
+func (d *dogstatsd) Tags() []string {
+	return d.tags
 }
