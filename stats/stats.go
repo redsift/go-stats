@@ -62,6 +62,42 @@ func (_ *discardCollector) Histogram(_ string, _ float64, _ ...string)    {}
 func (_ *discardCollector) Close()                                        {}
 func (_ *discardCollector) Tags() []string                                { return nil }
 
+
+type wrap struct {
+		c    Collector
+		tags []string
+	}
+
+func Wrap(c Collector, tags []string) Collector { return &wrap{c, tags} }
+
+func (w *wrap) Inform(title, text string, tags ...string) {
+		w.c.Inform(title, text, append(tags, w.tags...)...)
+	}
+
+func (w *wrap) Error(err error, tags ...string) {
+		w.c.Error(err, append(tags, w.tags...)...)
+	}
+
+func (w *wrap) Count(stat string, count float64, tags ...string) {
+		w.c.Count(stat, count, append(tags, w.tags...)...)
+	}
+
+func (w *wrap) Gauge(stat string, value float64, tags ...string) {
+		w.c.Gauge(stat, value, append(tags, w.tags...)...)
+	}
+
+func (w *wrap) Timing(stat string, value time.Duration, tags ...string) {
+		w.c.Timing(stat, value, append(tags, w.tags...)...)
+	}
+
+func (w *wrap) Histogram(stat string, value float64, tags ...string) {
+		w.c.Histogram(stat, value, append(tags, w.tags...)...)
+	}
+
+func (w *wrap) Close() { w.c.Close() }
+
+func (w *wrap) Tags() []string { return w.c.Tags() }
+
 // Safe for concurrent use
 var replacer = strings.NewReplacer(" ", "_", ".", "_")
 
