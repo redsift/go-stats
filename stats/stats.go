@@ -83,28 +83,33 @@ func newWithCollector(c Collector, tags ...string) Collector {
 	}
 }
 
+func (wc *withCollector) allTags(tags ...string) []string {
+	t := make([]string, 0, len(wc.tags)+len(tags))
+	return append(append(t, wc.tags...), tags...)
+}
+
 func (wc *withCollector) Inform(title, text string, tags ...string) {
-	wc.Inform(title, text, tags...)
+	wc.Inform(title, text, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Error(err error, tags ...string) {
-	wc.c.Error(err, tags...)
+	wc.c.Error(err, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Count(stat string, count float64, tags ...string) {
-	wc.c.Count(stat, count, tags...)
+	wc.c.Count(stat, count, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Gauge(stat string, value float64, tags ...string) {
-	wc.c.Gauge(stat, value, tags...)
+	wc.c.Gauge(stat, value, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Timing(stat string, value time.Duration, tags ...string) {
-	wc.c.Timing(stat, value, tags...)
+	wc.c.Timing(stat, value, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Histogram(stat string, value float64, tags ...string) {
-	wc.c.Histogram(stat, value, tags...)
+	wc.c.Histogram(stat, value, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Close() {
