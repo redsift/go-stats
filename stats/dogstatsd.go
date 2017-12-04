@@ -154,3 +154,7 @@ func (d *dogstatsd) Close() {
 func (d *dogstatsd) Tags() []string {
 	return d.tags
 }
+
+func (d *dogstatsd) With(tags ...string) Collector {
+	return newWithCollector(d, tags...)
+}

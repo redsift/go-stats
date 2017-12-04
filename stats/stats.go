@@ -11,25 +11,27 @@ import (
 
 type Collector interface {
 	// FYI entry
-	Inform(title, text string, tags ...string)
+	Inform(string, string, ...string)
 
 	// Error resulting in a notification
-	Error(e error, tags ...string)
+	Error(error, ...string)
 
 	// Measure rate of events over dT, an Inc = Count(1), Dec = Count(-1)
-	Count(stat string, count float64, tags ...string)
+	Count(string, float64, ...string)
 
 	// Log the value at T
-	Gauge(stat string, value float64, tags ...string)
+	Gauge(string, float64, ...string)
 
 	// Log the value at T for count/avg/median/max/95percentile
-	Timing(stat string, value time.Duration, tags ...string)
+	Timing(string, time.Duration, ...string)
 
-	Histogram(stat string, value float64, tags ...string)
+	Histogram(string, float64, ...string)
 
 	Close()
 
 	Tags() []string
+
+	With(...string) Collector
 }
 
 const (
@@ -61,10 +63,60 @@ func (_ *discardCollector) Timing(_ string, _ time.Duration, _ ...string) {}
 func (_ *discardCollector) Histogram(_ string, _ float64, _ ...string)    {}
 func (_ *discardCollector) Close()                                        {}
 func (_ *discardCollector) Tags() []string                                { return nil }
-
+func (dc *discardCollector) With(...string) Collector                     { return dc }
 
 // Safe for concurrent use
 var replacer = strings.NewReplacer(" ", "_", ".", "_")
 
 // lowercase, no '. '
 func Sanitise(in string) string { return replacer.Replace(strings.ToLower(in)) }
+
+type withCollector struct {
+	tags []string
+	c    Collector
+}
+
+func newWithCollector(c Collector, tags ...string) Collector {
+	return &withCollector{
+		tags: tags,
+		c:    c,
+	}
+}
+
+func (wc *withCollector) Inform(title, text string, tags ...string) {
+	wc.Inform(title, text, tags...)
+}
+
+func (wc *withCollector) Error(err error, tags ...string) {
+	wc.c.Error(err, tags...)
+}
+
+func (wc *withCollector) Count(stat string, count float64, tags ...string) {
+	wc.c.Count(stat, count, tags...)
+}
+
+func (wc *withCollector) Gauge(stat string, value float64, tags ...string) {
+	wc.c.Gauge(stat, value, tags...)
+}
+
+func (wc *withCollector) Timing(stat string, value time.Duration, tags ...string) {
+	wc.c.Timing(stat, value, tags...)
+}
+
+func (wc *withCollector) Histogram(stat string, value float64, tags ...string) {
+	wc.c.Histogram(stat, value, tags...)
+}
+
+func (wc *withCollector) Close() {
+	wc.c.Close()
+}
+
+func (wc *withCollector) Tags() []string {
+	ot := wc.c.Tags()
+	t := make([]string, 0, len(wc.tags)+len(ot))
+	return append(append(t, ot...), wc.tags...)
+}
+
+func (wc *withCollector) With(tags ...string) Collector {
+	return newWithCollector(wc, tags...)
+}
