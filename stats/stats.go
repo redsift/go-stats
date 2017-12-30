@@ -76,7 +76,7 @@ type withCollector struct {
 	c    Collector
 }
 
-func newWithCollector(c Collector, tags ...string) Collector {
+func NewWithCollector(c Collector, tags ...string) Collector {
 	return &withCollector{
 		tags: tags,
 		c:    c,
@@ -123,5 +123,5 @@ func (wc *withCollector) Tags() []string {
 }
 
 func (wc *withCollector) With(tags ...string) Collector {
-	return newWithCollector(wc, tags...)
+	return NewWithCollector(wc, tags...)
 }

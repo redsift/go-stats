@@ -156,5 +156,5 @@ func (d *dogstatsd) Tags() []string {
 }
 
 func (d *dogstatsd) With(tags ...string) Collector {
-	return newWithCollector(d, tags...)
+	return NewWithCollector(d, tags...)
 }
