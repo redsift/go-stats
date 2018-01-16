@@ -3,15 +3,19 @@
 
 [[projects]]
   name = "github.com/DataDog/dd-trace-go"
-  packages = ["tracer","tracer/ext"]
+  packages = [
+    "tracer",
+    "tracer/ext"
+  ]
   revision = "9234800b7bb0ffae18ca64026c5adcefaeebeadc"
   version = "v0.5.1"
 
 [[projects]]
+  branch = "patch"
   name = "github.com/PagerDuty/godspeed"
   packages = ["."]
-  revision = "d940a26b3aedd5752c2518b873f5cbd67ef459fb"
-  source = "https://github.com/PagerDuty/godspeed"
+  revision = "037eec8f3d382fd8871b944152caea0fb372d151"
+  source = "github.com/redsift/godspeed"
 
 [[projects]]
   name = "github.com/pierrec/xxHash"
@@ -34,14 +38,11 @@
 [[projects]]
   branch = "master"
   name = "github.com/redsift/go-foodfans"
-  packages = [".","lookup"]
+  packages = [
+    ".",
+    "lookup"
+  ]
   revision = "6c6e105f4a3333b501ab036ce34f4430fa19be9b"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/redsift/go-rstid"
-  packages = ["."]
-  revision = "c64e01877551cce123e25712c83023b96a4ad91e"
 
 [[projects]]
   branch = "master"
@@ -64,6 +65,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8d6f6d12072263ca982a97b202e3d5050aa7483e4d0062906be7aba0b217099e"
+  inputs-digest = "d6ab8a259943a318d00592ed618d8dc0e6b16407e2e2ab55ef25f237264faab5"
   solver-name = "gps-cdcl"
   solver-version = 1
