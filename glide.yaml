@@ -1,0 +1,8 @@
+package: github.com/redsift/go-stats
+
+# Declare your project's dependencies.
+import:
+- package: github.com/PagerDuty/godspeed
+  version: patch
+  repo: git@github.com:redsift/godspeed.git
+  vcs: git
