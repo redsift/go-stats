@@ -7,15 +7,8 @@
     "tracer",
     "tracer/ext"
   ]
-  revision = "9234800b7bb0ffae18ca64026c5adcefaeebeadc"
-  version = "v0.5.1"
-
-[[projects]]
-  branch = "patch"
-  name = "github.com/PagerDuty/godspeed"
-  packages = ["."]
-  revision = "037eec8f3d382fd8871b944152caea0fb372d151"
-  source = "github.com/redsift/godspeed"
+  revision = "66d30ecd989ecbdc79a95347fca5ba027f625449"
+  version = "v0.6.0"
 
 [[projects]]
   name = "github.com/pierrec/xxHash"
@@ -33,7 +26,7 @@
   branch = "master"
   name = "github.com/redsift/go-errs"
   packages = ["."]
-  revision = "6d10d659ca6fbd8a460e4b7e0f2d63b531a745eb"
+  revision = "084848d4071627d748dedaa821ee88bf2fa7d032"
 
 [[projects]]
   branch = "master"
@@ -45,26 +38,32 @@
   revision = "6c6e105f4a3333b501ab036ce34f4430fa19be9b"
 
 [[projects]]
-  branch = "master"
+  branch = "write-to-stream"
+  name = "github.com/theckman/godspeed"
+  packages = ["."]
+  revision = "bb0c16648ac9bba96610bb73c1524fbfc2082a11"
+  source = "github.com/deepakprabhakara/godspeed"
+
+[[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "54210f4e076c57f351166f0ed60e67d3fca57a36"
+  revision = "9c7f9b7a2bc3a520f7c7b30b34b7f85f47fe27b6"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "0a9397675ba34b2845f758fe3cd68828369c6517"
+  revision = "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["windows"]
-  revision = "314a259e304ff91bd6985da2a7149bbf91237993"
+  revision = "fff93fa7cd278d84afc205751523809c464168ab"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d6ab8a259943a318d00592ed618d8dc0e6b16407e2e2ab55ef25f237264faab5"
+  inputs-digest = "1d6d47ee4801738de051ae0783230a137dbe51820231bebcce19509116ce8a1a"
   solver-name = "gps-cdcl"
   solver-version = 1

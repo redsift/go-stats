@@ -1,6 +1,6 @@
 # go-stats
 
 [[constraint]]
-  branch = "patch"
-  name = "github.com/PagerDuty/godspeed"
-  source = "github.com/redsift/godspeed"
+  branch = "write-to-stream"
+  name = "github.com/theckman/godspeed"
+  source = "github.com/deepakprabhakara/godspeed"

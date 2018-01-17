@@ -5,8 +5,7 @@ import (
 	"time"
 
 	"github.com/redsift/go-errs"
-
-	"github.com/PagerDuty/godspeed"
+	"github.com/theckman/godspeed"
 )
 
 const sendBuffer = 16
