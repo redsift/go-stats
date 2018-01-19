@@ -3,6 +3,4 @@ package: github.com/redsift/go-stats
 # Declare your project's dependencies.
 import:
 - package: github.com/theckman/godspeed
-  version: write-to-stream
-  repo: git@github.com:deepakprabhakara/godspeed.git
-  vcs: git
+  version: "v1.1.0"

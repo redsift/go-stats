@@ -1,6 +1,4 @@
 # go-stats
 
 [[constraint]]
-  branch = "write-to-stream"
   name = "github.com/theckman/godspeed"
-  source = "github.com/deepakprabhakara/godspeed"

@@ -38,11 +38,10 @@
   revision = "6c6e105f4a3333b501ab036ce34f4430fa19be9b"
 
 [[projects]]
-  branch = "write-to-stream"
   name = "github.com/theckman/godspeed"
   packages = ["."]
-  revision = "bb0c16648ac9bba96610bb73c1524fbfc2082a11"
-  source = "github.com/deepakprabhakara/godspeed"
+  revision = "f83a49b7bc6ac3697810e1913aaee3504b344a95"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/ugorji/go"
@@ -59,11 +58,11 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["windows"]
-  revision = "fff93fa7cd278d84afc205751523809c464168ab"
+  revision = "2c42eef0765b9837fbdab12011af7830f55f88f0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1d6d47ee4801738de051ae0783230a137dbe51820231bebcce19509116ce8a1a"
+  inputs-digest = "580050a1a6d37798b6b92a36c297102cf415807adaeb09a725286a634d857897"
   solver-name = "gps-cdcl"
   solver-version = 1
