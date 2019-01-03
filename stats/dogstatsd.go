@@ -11,9 +11,11 @@ import (
 const sendBuffer = 16
 
 type dogstatsd struct {
-	send chan *statsd
-	ns   string
-	tags []string
+	send  chan *statsd
+	ns    string
+	tags  []string
+	close chan struct{}
+	a     *godspeed.Godspeed
 }
 
 type statsd struct {
@@ -36,6 +38,18 @@ type statsdEvent struct {
 	fields map[string]string
 }
 
+func send(a *godspeed.Godspeed, e *statsd) {
+	if e.statsdDatum != nil {
+		if err := a.Send(e.stat, e.kind, e.value, e.sampleRate, e.tags); err != nil {
+			log.Printf("Unable to send stats data: %s", err)
+		}
+	} else {
+		if err := a.Event(e.title, e.text, e.fields, e.tags); err != nil {
+			log.Printf("Unable to send stats event: %s", err)
+		}
+	}
+}
+
 func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
 	a, err := godspeed.New(host, port, false)
 	if err != nil {
@@ -46,22 +60,20 @@ func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, 
 	a.AddTags(tags)
 
 	ch := make(chan *statsd, sendBuffer)
+	close := make(chan struct{})
 
 	go func() {
-		for e := range ch {
-			if e.statsdDatum != nil {
-				if err := a.Send(e.stat, e.kind, e.value, e.sampleRate, e.tags); err != nil {
-					log.Printf("Unable to send stats data: %s", err)
-				}
-			} else {
-				if err := a.Event(e.title, e.text, e.fields, e.tags); err != nil {
-					log.Printf("Unable to send stats event: %s", err)
-				}
+		for {
+			select {
+			case e := <-ch:
+				send(a, e)
+			case <-close:
+				return
 			}
 		}
 	}()
 
-	return &dogstatsd{ch, ns, tags}, nil
+	return &dogstatsd{ch, ns, tags, close, a}, nil
 }
 
 type EventLevel int
@@ -147,7 +159,21 @@ func (d *dogstatsd) Histogram(stat string, value float64, tags ...string) {
 }
 
 func (d *dogstatsd) Close() {
-	close(d.send)
+	// safe to call Close multiple times
+	select {
+	case <-d.close: // already closed
+	default:
+		close(d.close)
+	}
+
+	for {
+		select {
+		case e := <-d.send:
+			send(d.a, e)
+		default:
+			return
+		}
+	}
 }
 
 func (d *dogstatsd) Tags() []string {
