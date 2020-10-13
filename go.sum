@@ -1,5 +1,7 @@
 github.com/DataDog/dd-trace-go v0.6.1 h1:nsZ2lohbSw1CKtfNRu3wPh1jFirv6XSz8vqNpuIYWbM=
 github.com/DataDog/dd-trace-go v0.6.1/go.mod h1:SmQTTcC37XMyEm75HV0AWiZIYxDiaNhRi49zorIpW+o=
+github.com/PagerDuty/godspeed v0.0.0-20180224001232-122876cde329 h1:3q+9OIju0tFi+TUZZuG80mRbXI3MT/L/1vlTb8CcofA=
+github.com/PagerDuty/godspeed v0.0.0-20180224001232-122876cde329/go.mod h1:u6OV0JEB9gtT/nTmTNEt6SXkQJW+SBnGWlJoSr+0F+U=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
@@ -22,8 +24,6 @@ github.com/redsift/go-foodfans v0.9.0/go.mod h1:9UmPCxsYFs0wy55Xd4oko85JEzpwG+jk
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
-github.com/theckman/godspeed v1.1.0 h1:PJyNf4xeeAMTxf2VFPMBLEEeETTcx804FkIxhd8pkfY=
-github.com/theckman/godspeed v1.1.0/go.mod h1:HbvX1ULDanALaHLD1Q1jwxL3THjMTn6KgpTSZ1MTvMQ=
 github.com/tinylib/msgp v1.1.2 h1:gWmO7n0Ys2RBEb7GPYB9Ujq8Mk5p2U08lRnmMcGy6BQ=
 github.com/tinylib/msgp v1.1.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/ugorji/go v0.0.0-20161130061742-9c7f9b7a2bc3 h1:KfqgRfYvGRyKOQUx8GphSC8D6vVoBndzco3rESP8I4k=
