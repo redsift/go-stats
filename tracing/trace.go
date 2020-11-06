@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 
 	"github.com/pierrec/xxHash/xxHash32"
-
 	"go.opentelemetry.io/otel/api/trace"
 )
 
