@@ -3,10 +3,47 @@ package tracer
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 
 	"github.com/pierrec/xxHash/xxHash32"
+	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/exporters/otlp"
+	"go.opentelemetry.io/otel/propagators"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
 )
+
+func InitTracingProvider(collectorAddress string, serviceName string) (func(), error) {
+	exp, err := otlp.NewExporter(
+		otlp.WithInsecure(),
+		otlp.WithAddress(collectorAddress),
+	)
+	if err != nil {
+		return func(){}, err
+	}
+
+	bsp := sdktrace.NewBatchSpanProcessor(exp)
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithResource(resource.New(
+			semconv.ServiceNameKey.String(serviceName),
+		)),
+		sdktrace.WithSpanProcessor(bsp),
+	)
+
+	// set global propagator to tracecontext (the default is no-op).
+	global.SetTextMapPropagator(propagators.TraceContext{})
+	global.SetTracerProvider(tracerProvider)
+
+	return func() {
+		bsp.Shutdown() // shutdown the processor
+		if err := exp.Shutdown(context.Background()); err != nil {
+			fmt.Printf("Error closing tracing exporter %s: %s", err, err)
+		}
+	}, nil
+}
 
 func NewRootSpanWithID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
 	traceID, err := asTraceID(id)
