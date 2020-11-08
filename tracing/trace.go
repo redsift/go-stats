@@ -3,9 +3,10 @@ package tracer
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 
-	"github.com/pierrec/xxHash/xxHash32"
+	"github.com/pierrec/xxHash/xxHash64"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/otlp"
@@ -21,7 +22,7 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 		otlp.WithAddress(collectorAddress),
 	)
 	if err != nil {
-		return func(){}, err
+		return func() {}, err
 	}
 
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
@@ -46,14 +47,18 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 }
 
 func NewRootSpanWithID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
+	if id == "" {
+		return nil, errors.New("trace id is empty")
+	}
+
 	traceID, err := asTraceID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	tc := trace.SpanContext{
-		TraceID: traceID,
-		SpanID: idGenerator.newSpanID(),
+		TraceID:    traceID,
+		SpanID:     idGenerator.newSpanID(),
 		TraceFlags: traceFlags,
 	}
 
@@ -61,8 +66,8 @@ func NewRootSpanWithID(ctx context.Context, id string, traceFlags byte) (context
 }
 
 func asTraceID(s string) (trace.ID, error) {
-	hash := xxHash32.Checksum([]byte(s), 0xCAFEBABE)
-	hx := hex.EncodeToString(i32tob(hash))
+	hash := xxHash64.Checksum([]byte(s), 0xCAFEBABE)
+	hx := hex.EncodeToString(i64tob(hash))
 
 	var id trace.ID
 	id, err := trace.IDFromHex(hx)
@@ -73,10 +78,10 @@ func asTraceID(s string) (trace.ID, error) {
 	return id, nil
 }
 
-func i32tob(val uint32) []byte {
-	r := make([]byte, 4)
-	for i := uint32(0); i < 4; i++ {
-		r[i] = byte((val >> (8 * i)) & 0xff)
+func i64tob(val uint64) []byte {
+	r := make([]byte, 8)
+	for i := uint64(0); i < 8; i++ {
+		r[i] = byte((val >> (i * 8)) & 0xff)
 	}
 	return r
 }
