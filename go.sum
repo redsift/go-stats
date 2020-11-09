@@ -13,6 +13,8 @@ github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDk
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dgryski/go-metro v0.0.0-20180109044635-280f6062b5bc h1:8WFBn63wegobsYAX0YjD+8suexZDga5CctH4CCTx2+8=
+github.com/dgryski/go-metro v0.0.0-20180109044635-280f6062b5bc/go.mod h1:c9O8+fpSOX1DM8cPNSkX/qsBWdkD4yd2dpciOWQjpBw=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
@@ -59,9 +61,12 @@ github.com/redsift/go-errs v0.1.0 h1:dm6L+Jh9tuOmxBMvsp+/Ps0N5C2qzQwxI4vL16edKms
 github.com/redsift/go-errs v0.1.0/go.mod h1:g3NS5RAQ9momWevyjjqRiRlEn5gMcPSmKKyNq/EvBy8=
 github.com/redsift/go-foodfans v0.9.0 h1:CC1xXerw4DhsYVuQVkJN2sOruxcOHhKBWePnDrCRdgo=
 github.com/redsift/go-foodfans v0.9.0/go.mod h1:9UmPCxsYFs0wy55Xd4oko85JEzpwG+jkEsqUuy4ylxw=
+github.com/redsift/go-rstid v1.0.0 h1:dlZCsDhY4gej/HC3Of74hUbUsDwICUNhJzC4mvQXGB4=
+github.com/redsift/go-rstid v1.0.0/go.mod h1:seGICbCs2WJvAVKOXka4kb6O2s8Swf/kitXE5teqF3w=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/tinylib/msgp v1.0.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/tinylib/msgp v1.1.2 h1:gWmO7n0Ys2RBEb7GPYB9Ujq8Mk5p2U08lRnmMcGy6BQ=
 github.com/tinylib/msgp v1.1.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/ugorji/go v0.0.0-20161130061742-9c7f9b7a2bc3 h1:KfqgRfYvGRyKOQUx8GphSC8D6vVoBndzco3rESP8I4k=
