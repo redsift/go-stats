@@ -25,7 +25,7 @@ func defIDGenerator() *defaultIDGenerator {
 	return gen
 }
 
-// NewSpanID returns a non-zero span ID from a randomly-chosen sequence.
+// newSpanID returns a non-zero span ID from a randomly-chosen sequence.
 func (gen *defaultIDGenerator) newSpanID() trace.SpanID {
 	gen.Lock()
 	defer gen.Unlock()
