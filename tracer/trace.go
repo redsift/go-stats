@@ -47,8 +47,8 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	}, nil
 }
 
-// NewSpanWithTraceID creates a new span context with a custom trace id
-func NewSpanWithTraceID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
+// ContextWithTraceID creates a new span context with a custom trace id
+func ContextWithTraceID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
 	if id == "" {
 		return nil, errors.New("trace id is empty")
 	}
