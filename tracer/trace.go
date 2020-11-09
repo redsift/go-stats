@@ -5,6 +5,8 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"io"
+
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/otlp"
@@ -12,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
-	"io"
+
 )
 
 func InitTracingProvider(collectorAddress string, serviceName string) (func(), error) {

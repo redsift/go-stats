@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel/api/trace"
 )
 
+// taken from go.opentelemetry.io/otel
 type defaultIDGenerator struct {
 	sync.Mutex
 	randSource *rand.Rand
