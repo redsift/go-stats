@@ -14,7 +14,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
-
 )
 
 func InitTracingProvider(collectorAddress string, serviceName string) (func(), error) {
@@ -72,7 +71,7 @@ func asTraceID(s string) (trace.ID, error) {
 	b := h.Sum(nil)
 
 	id := trace.ID{}
-	copy(id[:],b)
+	copy(id[:], b)
 
 	return id, nil
 }
