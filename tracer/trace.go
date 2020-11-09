@@ -16,6 +16,7 @@ import (
 	"go.opentelemetry.io/otel/semconv"
 )
 
+// InitTracingProvider creates a new otel tracing provide and returns a closer
 func InitTracingProvider(collectorAddress string, serviceName string) (func(), error) {
 	exp, err := otlp.NewExporter(
 		otlp.WithInsecure(),
