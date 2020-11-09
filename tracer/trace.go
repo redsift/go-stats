@@ -2,11 +2,11 @@ package tracer
 
 import (
 	"context"
-	"crypto/md5"
+	"encoding/binary"
 	"errors"
 	"fmt"
-	"io"
 
+	"github.com/dgryski/go-metro"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/otlp"
@@ -46,6 +46,7 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	}, nil
 }
 
+// NewSpanWithTraceID creates a new span context with a custom trace id
 func NewSpanWithTraceID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
 	if id == "" {
 		return nil, errors.New("trace id is empty")
@@ -66,12 +67,11 @@ func NewSpanWithTraceID(ctx context.Context, id string, traceFlags byte) (contex
 }
 
 func asTraceID(s string) (trace.ID, error) {
-	h := md5.New()
-	_, _ = io.WriteString(h, s)
-	b := h.Sum(nil)
+	h1, h2 := metro.Hash128([]byte(s), 0xCAFEBABE)
 
 	id := trace.ID{}
-	copy(id[:], b)
+	binary.LittleEndian.PutUint64(id[:8], h1)
+	binary.LittleEndian.PutUint64(id[8:], h2)
 
 	return id, nil
 }
