@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/otel/semconv"
 )
 
-// InitTracingProvider creates a new otel tracing provide and returns a closer
+// InitTracingProvider creates a new otel tracing provider and returns a closer.
 func InitTracingProvider(collectorAddress string, serviceName string) (func(), error) {
 	exp, err := otlp.NewExporter(
 		otlp.WithInsecure(),
@@ -47,7 +47,7 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	}, nil
 }
 
-// ContextWithTraceID creates a new span context with a custom trace id
+// ContextWithTraceID creates a new span context with a custom trace id.
 func ContextWithTraceID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
 	if id == "" {
 		return nil, errors.New("trace id is empty")
