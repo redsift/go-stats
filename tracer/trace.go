@@ -67,12 +67,46 @@ func ContextWithTraceID(ctx context.Context, id string, traceFlags byte) (contex
 	return trace.ContextWithRemoteSpanContext(ctx, tc), nil
 }
 
+// ContextWithSpan creates a new span context with a custom trace id.
+func ContextWithIDs(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
+	if id == "" {
+		return nil, errors.New("trace id is empty")
+	}
+
+	traceID, err := asTraceID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	spanID, err := asSpanID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	sc := trace.SpanContext{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: traceFlags,
+	}
+
+	return trace.ContextWithRemoteSpanContext(ctx, sc), nil
+}
+
 func asTraceID(s string) (trace.ID, error) {
 	h1, h2 := metro.Hash128([]byte(s), 0xCAFEBABE)
 
 	id := trace.ID{}
 	binary.LittleEndian.PutUint64(id[:8], h1)
 	binary.LittleEndian.PutUint64(id[8:], h2)
+
+	return id, nil
+}
+
+func asSpanID(s string) (trace.SpanID, error) {
+	h := metro.Hash64([]byte(s), 0xCAFEBABE)
+
+	id := trace.SpanID{}
+	binary.LittleEndian.PutUint64(id[:8], h)
 
 	return id, nil
 }
