@@ -47,30 +47,10 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	}, nil
 }
 
-// ContextWithTraceID creates a new span context with a custom trace id.
-func ContextWithTraceID(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
+// ContextWithSpan creates a new span context with a remote span and trace id's set to the one provided.
+func ContextWithRemoteSpanIDs(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
 	if id == "" {
-		return nil, errors.New("trace id is empty")
-	}
-
-	traceID, err := asTraceID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	tc := trace.SpanContext{
-		TraceID:    traceID,
-		SpanID:     idGenerator.newSpanID(),
-		TraceFlags: traceFlags,
-	}
-
-	return trace.ContextWithRemoteSpanContext(ctx, tc), nil
-}
-
-// ContextWithSpan creates a new span context with a custom trace id.
-func ContextWithIDs(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
-	if id == "" {
-		return nil, errors.New("trace id is empty")
+		return nil, errors.New("id is empty")
 	}
 
 	traceID, err := asTraceID(id)
