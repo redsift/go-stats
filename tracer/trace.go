@@ -47,7 +47,7 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	}, nil
 }
 
-// ContextWithSpan creates a new span context with a remote span and trace id's set to the one provided.
+// ContextWithRemoteSpanIDs creates a new span context with a remote span and trace id's set to the one provided.
 func ContextWithRemoteSpanIDs(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
 	if id == "" {
 		return nil, errors.New("id is empty")
