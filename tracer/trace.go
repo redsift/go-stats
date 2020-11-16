@@ -27,7 +27,7 @@ type Tracer struct {
 	trace.Tracer
 }
 
-// InitTracingProvider creates a new otel tracing provider and returns a closer.
+// InitTracingProvider creates a new otel tracing provider and returns it with a closer.
 func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, func(), error) {
 	exp, err := otlp.NewExporter(
 		otlp.WithInsecure(),
