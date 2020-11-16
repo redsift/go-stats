@@ -7,23 +7,34 @@ import (
 	"fmt"
 
 	"github.com/dgryski/go-metro"
+
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/otlp"
+	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/propagators"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
 )
 
+var (
+	emptyTraceID = trace.ID{}
+	emptySpanID = trace.SpanID{}
+)
+
+type Tracer struct {
+	trace.Tracer
+}
+
 // InitTracingProvider creates a new otel tracing provider and returns a closer.
-func InitTracingProvider(collectorAddress string, serviceName string) (func(), error) {
+func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, func(), error) {
 	exp, err := otlp.NewExporter(
 		otlp.WithInsecure(),
 		otlp.WithAddress(collectorAddress),
 	)
 	if err != nil {
-		return func() {}, err
+		return nil, func() {}, err
 	}
 
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
@@ -39,7 +50,10 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	global.SetTextMapPropagator(propagators.TraceContext{})
 	global.SetTracerProvider(tracerProvider)
 
-	return func() {
+	t := Tracer{}
+	t.Tracer = tracerProvider.Tracer("redsift/trace")
+
+	return &t, func() {
 		bsp.Shutdown() // shutdown the processor
 		if err := exp.Shutdown(context.Background()); err != nil {
 			fmt.Printf("Error closing tracing exporter %s: %s", err, err)
@@ -47,18 +61,27 @@ func InitTracingProvider(collectorAddress string, serviceName string) (func(), e
 	}, nil
 }
 
+// StartNewRootWithRequestID starts a new root span where the trace and span id's are derived from the request id,
+// its also adds the request id as an attribute to the span
+func (t *Tracer) StartNewRootWithRequestID(ctx context.Context, spanName string, requestID string) (context.Context, trace.Span, error) {
+	traceID, spanID, err  := requestIDtoSpanIDs(requestID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	getIDs := func() (traceId trace.ID, spanId trace.SpanID) {
+		return traceID, spanID
+	}
+
+	ctx, span := t.Start(ctx, spanName, trace.WithNewRoot(), trace.WithGetIDsFuncOption(getIDs))
+	span.SetAttributes(label.String("request-id", requestID))
+
+	return ctx, span, nil
+}
+
 // ContextWithRemoteSpanIDs creates a new span context with a remote span and trace id's set to the one provided.
 func ContextWithRemoteSpanIDs(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
-	if id == "" {
-		return nil, errors.New("id is empty")
-	}
-
-	traceID, err := asTraceID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	spanID, err := asSpanID(id)
+	traceID, spanID, err := requestIDtoSpanIDs(id)
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +93,24 @@ func ContextWithRemoteSpanIDs(ctx context.Context, id string, traceFlags byte) (
 	}
 
 	return trace.ContextWithRemoteSpanContext(ctx, sc), nil
+}
+
+func requestIDtoSpanIDs(id string) (trace.ID, trace.SpanID, error) {
+	if id == "" {
+		return emptyTraceID, emptySpanID, errors.New("id is empty")
+	}
+
+	traceID, err := asTraceID(id)
+	if err != nil {
+		return emptyTraceID, emptySpanID, err
+	}
+
+	spanID, err := asSpanID(id)
+	if err != nil {
+		return emptyTraceID, emptySpanID, err
+	}
+
+	return traceID, spanID, err
 }
 
 func asTraceID(s string) (trace.ID, error) {

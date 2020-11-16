@@ -19,7 +19,7 @@ require (
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.opentelemetry.io/otel v0.13.1-beta
 	go.opentelemetry.io/otel/exporters/otlp v0.13.0
-	go.opentelemetry.io/otel/sdk v0.13.0
+	go.opentelemetry.io/otel/sdk v0.13.1-beta
 	golang.org/x/net v0.0.0-20191002035440-2ec189313ef0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
