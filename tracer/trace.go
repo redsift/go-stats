@@ -61,9 +61,9 @@ func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, 
 	}, nil
 }
 
-// StartNewRootWithRequestID starts a new root span where the trace and span id's are derived from the request id,
+// StartRootSpanWithRequestID starts a new root span where the trace and span id's are derived from the request id,
 // its also adds the request id as an attribute to the span
-func (t *Tracer) StartNewRootWithRequestID(ctx context.Context, spanName string, requestID string) (context.Context, trace.Span, error) {
+func (t *Tracer) StartRootSpanWithRequestID(ctx context.Context, spanName string, requestID string) (context.Context, trace.Span, error) {
 	traceID, spanID, err  := requestIDtoSpanIDs(requestID)
 	if err != nil {
 		return nil, nil, err
