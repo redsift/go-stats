@@ -1,4 +1,4 @@
-package go_stats
+package gostats
 
 import (
 	"context"
