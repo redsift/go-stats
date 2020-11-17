@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"fmt"
-
 	"github.com/dgryski/go-metro"
 
 	"go.opentelemetry.io/otel/api/global"
@@ -25,16 +23,19 @@ var (
 
 type Tracer struct {
 	trace.Tracer
+
+	batchSpanProcessor *sdktrace.BatchSpanProcessor
+	exporter *otlp.Exporter
 }
 
 // InitTracingProvider creates a new otel tracing provider and returns it with a closer.
-func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, func(), error) {
+func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, error) {
 	exp, err := otlp.NewExporter(
 		otlp.WithInsecure(),
 		otlp.WithAddress(collectorAddress),
 	)
 	if err != nil {
-		return nil, func() {}, err
+		return nil, err
 	}
 
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
@@ -50,14 +51,10 @@ func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, 
 	global.SetTextMapPropagator(propagators.TraceContext{})
 	global.SetTracerProvider(tracerProvider)
 
-	t := Tracer{}
-	t.Tracer = tracerProvider.Tracer("redsift/trace")
-
-	return &t, func() {
-		bsp.Shutdown() // shutdown the processor
-		if err := exp.Shutdown(context.Background()); err != nil {
-			fmt.Printf("Error closing tracing exporter %s: %s", err, err)
-		}
+	return &Tracer{
+		Tracer: tracerProvider.Tracer("redsift/trace"),
+		batchSpanProcessor: bsp,
+		exporter:exp,
 	}, nil
 }
 
@@ -78,6 +75,13 @@ func (t *Tracer) StartRootSpanWithRequestID(ctx context.Context, spanName string
 
 	return ctx, span, nil
 }
+
+// Close closes the exporter and span processor
+func (t *Tracer) Close(ctx context.Context) error {
+	t.batchSpanProcessor.Shutdown()
+	return t.exporter.Shutdown(ctx)
+}
+
 
 // ContextWithRemoteSpanIDs creates a new span context with a remote span and trace id's set to the one provided.
 func ContextWithRemoteSpanIDs(ctx context.Context, id string, traceFlags byte) (context.Context, error) {
