@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
+
 	"github.com/dgryski/go-metro"
 
 	"go.opentelemetry.io/otel/api/global"
@@ -28,7 +29,7 @@ type Tracer struct {
 	exporter *otlp.Exporter
 }
 
-// InitTracingProvider creates a new otel tracing provider and returns it with a closer.
+// InitTracingProvider creates a new otel tracing provider and returns it.
 func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, error) {
 	exp, err := otlp.NewExporter(
 		otlp.WithInsecure(),
