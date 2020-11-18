@@ -63,12 +63,16 @@ github.com/redsift/opentelemetry-go v0.13.1-beta h1:fuFdRGmAoUVolsU3kaNLcfpGLHwC
 github.com/redsift/opentelemetry-go v0.13.1-beta/go.mod h1:dlSNewoRYikTkotEnxdmuBHgzT+k/idJSfDv/FxEnOY=
 github.com/redsift/opentelemetry-go v0.13.2-beta h1:hn7lBWW8q67suuKSYcMj6U7QF2M1Nznlr0wzUEnVYvE=
 github.com/redsift/opentelemetry-go v0.13.2-beta/go.mod h1:dlSNewoRYikTkotEnxdmuBHgzT+k/idJSfDv/FxEnOY=
+github.com/redsift/opentelemetry-go v0.13.3-beta h1:M3BfcyMZiSQSHNVVXIHg9TtRpePeXTaqH3q9T8BWWQg=
+github.com/redsift/opentelemetry-go v0.13.3-beta/go.mod h1:dlSNewoRYikTkotEnxdmuBHgzT+k/idJSfDv/FxEnOY=
 github.com/redsift/opentelemetry-go/exporters/otlp v0.13.0 h1:uVjqAMEeWCu3DFdwQGZn4LlEPA5iHRE2UGtGpFvul7A=
 github.com/redsift/opentelemetry-go/exporters/otlp v0.13.0/go.mod h1:YHH58UrGcqCKtBkY7sl3zPKpxBzfC1HUUYMRQONJJ9E=
 github.com/redsift/opentelemetry-go/sdk v0.13.1-beta h1:ET30okcctt5moDnjnEsXrBbli3E7aePb8SgKhupGrno=
 github.com/redsift/opentelemetry-go/sdk v0.13.1-beta/go.mod h1:p/jQrkbkNZt5xQJGREqEaN8PL7FyihwXyUNo+xbDOgE=
 github.com/redsift/opentelemetry-go/sdk v0.13.2-beta h1:v/BQ5E0Ut+rsZinbeC8SatVpWR7CVcxFsNNHQ/Y3gNk=
 github.com/redsift/opentelemetry-go/sdk v0.13.2-beta/go.mod h1:/ynScxsAOIOxWNKIvGlHi11BF5S5JwaTRM8dZSZRfvs=
+github.com/redsift/opentelemetry-go/sdk v0.13.3-beta h1:5Oa5vWn0RG0hf6JzlmtPq9g3T/z/BzRimhDbbKGOt5o=
+github.com/redsift/opentelemetry-go/sdk v0.13.3-beta/go.mod h1:WpZZn4gtA4f3EBb4ekCqbDOcWKpQ3aR6eui1ZTkKNnk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=

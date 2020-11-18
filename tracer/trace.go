@@ -2,11 +2,6 @@ package tracer
 
 import (
 	"context"
-	"encoding/binary"
-	"errors"
-
-	"github.com/dgryski/go-metro"
-
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/exporters/otlp"
@@ -62,16 +57,12 @@ func InitTracingProvider(collectorAddress string, serviceName string) (*Tracer, 
 // StartRootSpanWithRequestID starts a new root span where the trace and span id's are derived from the request id,
 // its also adds the request id as an attribute to the span
 func (t *Tracer) StartRootSpanWithRequestID(ctx context.Context, spanName string, requestID string) (context.Context, trace.Span, error) {
-	traceID, spanID, err  := requestIDtoSpanIDs(requestID)
+	generator, err := newIDGenerator(requestID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	getIDs := func() (traceId trace.ID, spanId trace.SpanID) {
-		return traceID, spanID
-	}
-
-	ctx, span := t.Start(ctx, spanName, trace.WithNewRoot(), trace.WithGetIDsFuncOption(getIDs))
+	ctx, span := t.Start(ctx, spanName, trace.WithNewRoot(), trace.WithIDGenerator(generator))
 	span.SetAttributes(label.String("request-id", requestID))
 
 	return ctx, span, nil
@@ -100,39 +91,3 @@ func ContextWithRemoteSpanIDs(ctx context.Context, id string, traceFlags byte) (
 	return trace.ContextWithRemoteSpanContext(ctx, sc), nil
 }
 
-func requestIDtoSpanIDs(id string) (trace.ID, trace.SpanID, error) {
-	if id == "" {
-		return emptyTraceID, emptySpanID, errors.New("id is empty")
-	}
-
-	traceID, err := asTraceID(id)
-	if err != nil {
-		return emptyTraceID, emptySpanID, err
-	}
-
-	spanID, err := asSpanID(id)
-	if err != nil {
-		return emptyTraceID, emptySpanID, err
-	}
-
-	return traceID, spanID, err
-}
-
-func asTraceID(s string) (trace.ID, error) {
-	h1, h2 := metro.Hash128([]byte(s), 0xCAFEBABE)
-
-	id := trace.ID{}
-	binary.LittleEndian.PutUint64(id[:8], h1)
-	binary.LittleEndian.PutUint64(id[8:], h2)
-
-	return id, nil
-}
-
-func asSpanID(s string) (trace.SpanID, error) {
-	h := metro.Hash64([]byte(s), 0xCAFEBABE)
-
-	id := trace.SpanID{}
-	binary.LittleEndian.PutUint64(id[:8], h)
-
-	return id, nil
-}
