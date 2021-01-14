@@ -89,7 +89,7 @@ func (wc *withCollector) allTags(tags ...string) []string {
 }
 
 func (wc *withCollector) Inform(title, text string, tags ...string) {
-	wc.Inform(title, text, wc.allTags(tags...)...)
+	wc.c.Inform(title, text, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Error(err error, tags ...string) {
