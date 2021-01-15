@@ -34,11 +34,14 @@ type Collector interface {
 	With(...string) Collector
 }
 
-const (
-	ctxKeyCollector = "redsift/go-stats/stats#Collector"
-)
+type contextKey struct {
+	v string
+}
 
-// ContextWithCollector creates a new context with an instance of Collector
+//nolint:gochecknoglobals
+var ctxKeyCollector = contextKey{"collector"}
+
+// ContextWithCollector creates a new context with an instance of Collector.
 func ContextWithCollector(ctx context.Context, c Collector) context.Context {
 	return context.WithValue(ctx, ctxKeyCollector, c)
 }
@@ -49,26 +52,28 @@ func CollectorFromContext(ctx context.Context) Collector {
 	if c := ctx.Value(ctxKeyCollector); c != nil {
 		return c.(Collector)
 	}
+
 	return nil
 }
 
 type discardCollector struct{}
 
-func NewDiscardCollector() Collector                                      { return &discardCollector{} }
-func (_ *discardCollector) Inform(_, _ string, _ ...string)               {}
-func (_ *discardCollector) Error(_ error, _ ...string)                    {}
-func (_ *discardCollector) Count(_ string, _ float64, _ ...string)        {}
-func (_ *discardCollector) Gauge(_ string, _ float64, _ ...string)        {}
-func (_ *discardCollector) Timing(_ string, _ time.Duration, _ ...string) {}
-func (_ *discardCollector) Histogram(_ string, _ float64, _ ...string)    {}
-func (_ *discardCollector) Close()                                        {}
-func (_ *discardCollector) Tags() []string                                { return nil }
-func (dc *discardCollector) With(...string) Collector                     { return dc }
+func NewDiscardCollector() Collector                                    { return &discardCollector{} }
+func (*discardCollector) Inform(_, _ string, _ ...string)               {}
+func (*discardCollector) Error(_ error, _ ...string)                    {}
+func (*discardCollector) Count(_ string, _ float64, _ ...string)        {}
+func (*discardCollector) Gauge(_ string, _ float64, _ ...string)        {}
+func (*discardCollector) Timing(_ string, _ time.Duration, _ ...string) {}
+func (*discardCollector) Histogram(_ string, _ float64, _ ...string)    {}
+func (*discardCollector) Close()                                        {}
+func (*discardCollector) Tags() []string                                { return nil }
+func (dc *discardCollector) With(...string) Collector                   { return dc }
 
-// Safe for concurrent use
+// Safe for concurrent use.
+//nolint:gochecknoglobals
 var replacer = strings.NewReplacer(" ", "_", ".", "_")
 
-// lowercase, no '. '
+// Sanitise returns copy of in string in lowercase; ' ' and '.' replaced with '_'.
 func Sanitise(in string) string { return replacer.Replace(strings.ToLower(in)) }
 
 type withCollector struct {
@@ -85,11 +90,12 @@ func NewWithCollector(c Collector, tags ...string) Collector {
 
 func (wc *withCollector) allTags(tags ...string) []string {
 	t := make([]string, 0, len(wc.tags)+len(tags))
+
 	return append(append(t, wc.tags...), tags...)
 }
 
 func (wc *withCollector) Inform(title, text string, tags ...string) {
-	wc.Inform(title, text, wc.allTags(tags...)...)
+	wc.c.Inform(title, text, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Error(err error, tags ...string) {
@@ -119,6 +125,7 @@ func (wc *withCollector) Close() {
 func (wc *withCollector) Tags() []string {
 	ot := wc.c.Tags()
 	t := make([]string, 0, len(wc.tags)+len(ot))
+
 	return append(append(t, ot...), wc.tags...)
 }
 

@@ -1,57 +1,53 @@
 //
-// statsd.go
+// Copyright (c) 2016-2021 Redsift Limited. All rights reserved.
 //
-//
-// Copyright (c) 2016 Redsift Limited. All rights reserved.
-//
-
 package statsd
 
 import (
-	"fmt"
-	"os"
-	"sync"
-
-	"github.com/redsift/go-cfg"
+	env "github.com/redsift/go-cfg"
 	"github.com/redsift/go-stats/stats"
 )
 
-const defaultPort = 8125
+const (
+	EnvNamespace = "STATSD_NAMESPACE"
+	EnvHost      = "STATSD_HOST"
+	EnvPort      = "STATSD_PORT"
+	EnvTags      = "STATSD_TAGS"
+)
 
-var (
+type config struct {
 	namespace string
 	host      string
 	port      int
-	gtags     []string
-	once      sync.Once
-)
-
-func configure() {
-	namespace = cfg.EnvString("STATSD_NAMESPACE", "")
-	host = cfg.EnvString("STATSD_HOST", "127.0.0.1")
-	port = cfg.EnvInt("STATSD_PORT", defaultPort)
-	gtags = cfg.EnvStringArray("STATSD_TAGS")
+	tags      []string
 }
 
-func Init() {
-	once.Do(configure)
-}
+type Option func(*config)
 
-func New() stats.Collector {
-	once.Do(configure)
+func OptHost(s string) Option      { return func(c *config) { c.host = s } }
+func OptPort(n int) Option         { return func(c *config) { c.port = n } }
+func OptNamespace(s string) Option { return func(c *config) { c.namespace = s } }
+func OptTags(l ...string) Option   { return func(c *config) { c.tags = l } }
 
-	if namespace == "" {
-		fmt.Println("No stats collector specified, sinking to null")
+func New(opts ...Option) stats.Collector {
+	cfg := &config{
+		host:      env.EnvString(EnvHost, "127.0.0.1"),
+		port:      env.EnvInt(EnvPort, 8125),
+		namespace: env.EnvString(EnvNamespace, ""),
+		tags:      env.EnvStringArray(EnvTags),
+	}
+
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	if cfg.namespace == "" {
 		return stats.NewDiscardCollector()
 	}
 
-	tags := gtags
-
-	var err error
-	collector, err := stats.NewDogstatsD(host, port, namespace, tags...)
+	collector, err := stats.NewDogstatsD(cfg.host, cfg.port, cfg.namespace, cfg.tags...)
 	if err != nil {
-		fmt.Printf("Could not create DogstatsD collector: %s\n", err)
-		os.Exit(1)
+		return stats.NewDiscardCollector()
 	}
 
 	return collector
