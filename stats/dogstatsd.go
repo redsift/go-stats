@@ -13,11 +13,11 @@ import (
 const sendBuffer = 16
 
 type dogstatsd struct {
-	send  chan *statsd
-	ns    string
-	tags  []string
-	close chan struct{}
-	a     *godspeed.Godspeed
+	send chan *statsd
+	ns   string
+	tags []string
+	ctl  chan struct{}
+	a    *godspeed.Godspeed
 }
 
 type statsd struct {
@@ -62,20 +62,20 @@ func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, 
 	a.AddTags(tags)
 
 	ch := make(chan *statsd, sendBuffer)
-	close := make(chan struct{})
+	ctl := make(chan struct{})
 
 	go func() {
 		for {
 			select {
 			case e := <-ch:
 				send(a, e)
-			case <-close:
+			case <-ctl:
 				return
 			}
 		}
 	}()
 
-	return &dogstatsd{ch, ns, tags, close, a}, nil
+	return &dogstatsd{ch, ns, tags, ctl, a}, nil
 }
 
 type EventLevel int
@@ -173,9 +173,9 @@ func (d *dogstatsd) Histogram(stat string, value float64, tags ...string) {
 func (d *dogstatsd) Close() {
 	// safe to call Close multiple times
 	select {
-	case <-d.close: // already closed
+	case <-d.ctl: // already closed
 	default:
-		close(d.close)
+		close(d.ctl)
 	}
 
 	for {
