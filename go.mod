@@ -10,6 +10,5 @@ require (
 	github.com/redsift/go-errs v0.1.0
 	github.com/redsift/go-foodfans v0.9.0 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
-	golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

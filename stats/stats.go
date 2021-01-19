@@ -1,10 +1,9 @@
 package stats
 
 import (
+	"context"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 // Tags should use a key:value format

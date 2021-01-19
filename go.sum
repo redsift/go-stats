@@ -15,7 +15,5 @@ github.com/redsift/go-foodfans v0.9.0 h1:CC1xXerw4DhsYVuQVkJN2sOruxcOHhKBWePnDrC
 github.com/redsift/go-foodfans v0.9.0/go.mod h1:9UmPCxsYFs0wy55Xd4oko85JEzpwG+jkEsqUuy4ylxw=
 github.com/tinylib/msgp v1.1.2 h1:gWmO7n0Ys2RBEb7GPYB9Ujq8Mk5p2U08lRnmMcGy6BQ=
 github.com/tinylib/msgp v1.1.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
-golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b h1:Xu6Gf1IrU0c8CSJqWR43Bh8vb+Ft3jVIUahRiqL1oaI=
-golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogRM/Nc3DYOhEAlW+xobZo=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
