@@ -13,10 +13,8 @@ import (
 const sendBuffer = 16
 
 type dogstatsd struct {
-	send chan *statsd
 	ns   string
 	tags []string
-	ctl  chan struct{}
 	a    *godspeed.Godspeed
 }
 
@@ -61,21 +59,7 @@ func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, 
 	a.SetNamespace(ns)
 	a.AddTags(tags)
 
-	ch := make(chan *statsd, sendBuffer)
-	ctl := make(chan struct{})
-
-	go func() {
-		for {
-			select {
-			case e := <-ch:
-				send(a, e)
-			case <-ctl:
-				return
-			}
-		}
-	}()
-
-	return &dogstatsd{ch, ns, tags, ctl, a}, nil
+	return &dogstatsd{ns, tags, a}, nil
 }
 
 type EventLevel int
@@ -123,7 +107,8 @@ func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation str
 		tags = append(tags, d.ns)
 	}
 
-	d.send <- &statsd{nil, &statsdEvent{title, text, fields}, tags}
+	e := &statsd{nil, &statsdEvent{title, text, fields}, tags}
+	send(d.a, e)
 }
 
 func (d *dogstatsd) Inform(title, text string, tags ...string) {
@@ -155,37 +140,30 @@ func (d *dogstatsd) Error(err error, tags ...string) {
 }
 
 func (d *dogstatsd) Count(stat string, count float64, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "c", count, 1}, nil, tags}
+	e := &statsd{&statsdDatum{stat, "c", count, 1}, nil, tags}
+	send(d.a, e)
 }
 
 func (d *dogstatsd) Gauge(stat string, value float64, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "g", value, 1}, nil, tags}
+	e := &statsd{&statsdDatum{stat, "g", value, 1}, nil, tags}
+	send(d.a, e)
+
 }
 
 func (d *dogstatsd) Timing(stat string, value time.Duration, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "ms", float64(value) / float64(time.Millisecond), 1}, nil, tags}
+	e := &statsd{&statsdDatum{stat, "ms", float64(value) / float64(time.Millisecond), 1}, nil, tags}
+	send(d.a, e)
+
 }
 
 func (d *dogstatsd) Histogram(stat string, value float64, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "h", value, 1}, nil, tags}
+	e := &statsd{&statsdDatum{stat, "h", value, 1}, nil, tags}
+	send(d.a, e)
 }
 
 func (d *dogstatsd) Close() {
-	// safe to call Close multiple times
-	select {
-	case <-d.ctl: // already closed
-	default:
-		close(d.ctl)
-	}
-
-	for {
-		select {
-		case e := <-d.send:
-			send(d.a, e)
-		default:
-			return
-		}
-	}
+	// nothing to do!
+	d.a.Conn.Close()
 }
 
 func (d *dogstatsd) Tags() []string {
