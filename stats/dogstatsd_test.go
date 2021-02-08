@@ -3,8 +3,6 @@ package stats
 import (
 	"bytes"
 	"net"
-	"os"
-	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -14,8 +12,8 @@ import (
 )
 
 type testSvr struct {
-	Port int
-	sock *net.UDPConn
+	Port  int
+	sock  *net.UDPConn
 	Count int64
 }
 
@@ -50,39 +48,40 @@ func (s *testSvr) Close() {
 	s.sock.Close()
 }
 
+func terminate(d Collector) {
+	d.Count("exit", 9999)
+	time.Sleep(time.Millisecond)
+}
+
 func TestCount(t *testing.T) {
 	s := newTestSvr(t)
 	defer s.Close()
-	os.Setenv("STATSD_NAMESPACE", "test_namespace")
-	os.Setenv("STATSD_PORT", strconv.Itoa(s.Port))
 	go s.ReadMsg(t)
 
 	d, err := NewDogstatsD("127.0.0.1", s.Port, "test_namespace", "test:tag")
+	defer d.Close()
 	require.NoError(t, err)
 	d.Count("test", 1, "a", "b")
 
-	d.Count("exit", 9999)
-	time.Sleep(time.Millisecond)
+	terminate(d)
 	assert.Equal(t, int64(1), atomic.LoadInt64(&s.Count))
 }
 
 func TestCount100000(t *testing.T) {
 	s := newTestSvr(t)
 	defer s.Close()
-	os.Setenv("STATSD_NAMESPACE", "test_namespace")
-	os.Setenv("STATSD_PORT", strconv.Itoa(s.Port))
 	go s.ReadMsg(t)
 
 	d, err := NewDogstatsD("127.0.0.1", s.Port, "test_namespace", "test:tag")
+	defer d.Close()
 	require.NoError(t, err)
 	start := time.Now()
-	n := 10000
+	n := 1000
 	for i := 0; i < n; i++ {
 		d.Count("test", 1, "a", "b")
 	}
 	delta := time.Since(start)
 	t.Logf("sending %d metrics took %s - %s per message", n, delta, delta/time.Duration(n))
-	d.Count("exit", 9999)
-	time.Sleep(time.Millisecond)
+	terminate(d)
 	assert.Equal(t, int64(n), atomic.LoadInt64(&s.Count))
 }

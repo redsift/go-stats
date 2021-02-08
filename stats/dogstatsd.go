@@ -140,25 +140,19 @@ func (d *dogstatsd) Error(err error, tags ...string) {
 }
 
 func (d *dogstatsd) Count(stat string, count float64, tags ...string) {
-	e := &statsd{&statsdDatum{stat, "c", count, 1}, nil, tags}
-	send(d.a, e)
+	d.a.Count(stat, count, tags)
 }
 
 func (d *dogstatsd) Gauge(stat string, value float64, tags ...string) {
-	e := &statsd{&statsdDatum{stat, "g", value, 1}, nil, tags}
-	send(d.a, e)
-
+	d.a.Gauge(stat, value, tags)
 }
 
 func (d *dogstatsd) Timing(stat string, value time.Duration, tags ...string) {
-	e := &statsd{&statsdDatum{stat, "ms", float64(value) / float64(time.Millisecond), 1}, nil, tags}
-	send(d.a, e)
-
+	d.a.Timing(stat, float64(value)/float64(time.Millisecond), tags)
 }
 
 func (d *dogstatsd) Histogram(stat string, value float64, tags ...string) {
-	e := &statsd{&statsdDatum{stat, "h", value, 1}, nil, tags}
-	send(d.a, e)
+	d.a.Histogram(stat, value, tags)
 }
 
 func (d *dogstatsd) Close() {
