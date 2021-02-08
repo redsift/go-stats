@@ -9,7 +9,7 @@ require (
 	github.com/redsift/go-cfg v0.1.0
 	github.com/redsift/go-errs v0.1.0
 	github.com/redsift/go-foodfans v0.9.0 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/stretchr/testify v1.7.0
 	github.com/tinylib/msgp v1.1.2 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

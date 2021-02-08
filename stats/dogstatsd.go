@@ -10,8 +10,6 @@ import (
 	"github.com/redsift/go-errs"
 )
 
-const sendBuffer = 16
-
 type dogstatsd struct {
 	ns   string
 	tags []string
