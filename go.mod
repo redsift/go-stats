@@ -1,6 +1,6 @@
 module github.com/redsift/go-stats
 
-go 1.13
+go 1.16
 
 require (
 	github.com/PagerDuty/godspeed v0.0.0-20180224001232-122876cde329
