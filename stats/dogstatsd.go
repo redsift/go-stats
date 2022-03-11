@@ -6,18 +6,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/PagerDuty/godspeed"
+	ddsd "github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/redsift/go-errs"
 )
 
 const sendBuffer = 16
 
 type dogstatsd struct {
-	send chan *statsd
 	ns   string
 	tags []string
-	ctl  chan struct{}
-	a    *godspeed.Godspeed
+	a    *ddsd.Client
 }
 
 type statsd struct {
@@ -40,42 +38,13 @@ type statsdEvent struct {
 	fields map[string]string
 }
 
-func send(a *godspeed.Godspeed, e *statsd) {
-	if e.statsdDatum != nil {
-		if err := a.Send(e.stat, e.kind, e.value, e.sampleRate, e.tags); err != nil {
-			log.Printf("Unable to send stats data: %s", err)
-		}
-	} else {
-		if err := a.Event(e.title, e.text, e.fields, e.tags); err != nil {
-			log.Printf("Unable to send stats event: %s", err)
-		}
-	}
-}
-
 func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
-	a, err := godspeed.New(host, port, false)
+	a, err := ddsd.New(fmt.Sprintf("%s:%d", host, port), ddsd.WithNamespace(ns), ddsd.WithTags(tags))
 	if err != nil {
 		return nil, fmt.Errorf("failed to created statsd client: %w", err)
 	}
 
-	a.SetNamespace(ns)
-	a.AddTags(tags)
-
-	ch := make(chan *statsd, sendBuffer)
-	ctl := make(chan struct{})
-
-	go func() {
-		for {
-			select {
-			case e := <-ch:
-				send(a, e)
-			case <-ctl:
-				return
-			}
-		}
-	}()
-
-	return &dogstatsd{ch, ns, tags, ctl, a}, nil
+	return &dogstatsd{ns, tags, a}, nil
 }
 
 type EventLevel int
@@ -92,29 +61,28 @@ const (
 // Use source string to identify the source of the event.
 // Set low to true if the event has a low priority.
 func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
-	fields := make(map[string]string)
-
+	ev := ddsd.NewEvent(title, text)
 	switch level {
 	case Success:
-		fields["alert_type"] = "success"
+		ev.AlertType = ddsd.Success
 	case Warning:
-		fields["alert_type"] = "warning"
+		ev.AlertType = ddsd.Warning
 	case Error:
-		fields["alert_type"] = "error"
+		ev.AlertType = ddsd.Error
 	case Info:
-		fields["alert_type"] = "info"
+		ev.AlertType = ddsd.Info
 	}
 
 	if aggregation != "" {
-		fields["aggregation_key"] = aggregation
+		ev.AggregationKey = aggregation
 	}
 
 	if source != "" {
-		fields["source_type_name"] = source
+		ev.SourceTypeName = source
 	}
 
 	if low {
-		fields["priority"] = "low"
+		ev.Priority = ddsd.Low
 	}
 
 	if len(tags) == 0 {
@@ -123,7 +91,9 @@ func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation str
 		tags = append(tags, d.ns)
 	}
 
-	d.send <- &statsd{nil, &statsdEvent{title, text, fields}, tags}
+	ev.Tags = tags
+
+	d.a.Event(ev)
 }
 
 func (d *dogstatsd) Inform(title, text string, tags ...string) {
@@ -155,37 +125,31 @@ func (d *dogstatsd) Error(err error, tags ...string) {
 }
 
 func (d *dogstatsd) Count(stat string, count float64, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "c", count, 1}, nil, tags}
+	if err := d.a.Count(stat, int64(count), tags, 1); err != nil {
+		log.Printf("Unable to send stats data: %s", err)
+	}
 }
 
 func (d *dogstatsd) Gauge(stat string, value float64, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "g", value, 1}, nil, tags}
+	if err := d.a.Gauge(stat, value, tags, 1); err != nil {
+		log.Printf("Unable to send stats data: %s", err)
+	}
 }
 
 func (d *dogstatsd) Timing(stat string, value time.Duration, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "ms", float64(value) / float64(time.Millisecond), 1}, nil, tags}
+	if err := d.a.Timing(stat, value, tags, 1); err != nil {
+		log.Printf("Unable to send stats data: %s", err)
+	}
 }
 
 func (d *dogstatsd) Histogram(stat string, value float64, tags ...string) {
-	d.send <- &statsd{&statsdDatum{stat, "h", value, 1}, nil, tags}
+	if err := d.a.Histogram(stat, value, tags, 1); err != nil {
+		log.Printf("Unable to send stats data: %s", err)
+	}
 }
 
 func (d *dogstatsd) Close() {
-	// safe to call Close multiple times
-	select {
-	case <-d.ctl: // already closed
-	default:
-		close(d.ctl)
-	}
-
-	for {
-		select {
-		case e := <-d.send:
-			send(d.a, e)
-		default:
-			return
-		}
-	}
+	d.a.Close()
 }
 
 func (d *dogstatsd) Tags() []string {
