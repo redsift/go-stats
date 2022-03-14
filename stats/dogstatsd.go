@@ -10,32 +10,10 @@ import (
 	"github.com/redsift/go-errs"
 )
 
-const sendBuffer = 16
-
 type dogstatsd struct {
 	ns   string
 	tags []string
 	a    *ddsd.Client
-}
-
-type statsd struct {
-	*statsdDatum
-	*statsdEvent
-
-	tags []string
-}
-
-type statsdDatum struct {
-	stat       string
-	kind       string
-	value      float64
-	sampleRate float64
-}
-
-type statsdEvent struct {
-	title  string
-	text   string
-	fields map[string]string
 }
 
 func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
@@ -93,7 +71,9 @@ func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation str
 
 	ev.Tags = tags
 
-	d.a.Event(ev)
+	if err := d.a.Event(ev); err != nil {
+		log.Printf("Unable to send stats event: %s", err)
+	}
 }
 
 func (d *dogstatsd) Inform(title, text string, tags ...string) {
