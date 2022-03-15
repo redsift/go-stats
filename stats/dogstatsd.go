@@ -19,7 +19,16 @@ type dogstatsd struct {
 func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
 	a, err := ddsd.New(fmt.Sprintf("%s:%d", host, port), ddsd.WithNamespace(ns), ddsd.WithTags(tags))
 	if err != nil {
-		return nil, fmt.Errorf("failed to created statsd client: %w", err)
+		return nil, fmt.Errorf("failed to create statsd client: %w", err)
+	}
+
+	return &dogstatsd{ns, tags, a}, nil
+}
+
+func NewWithDogClient(client *ddsd.Client, ns string, tags ...string) (Collector, error) {
+	a, err := ddsd.CloneWithExtraOptions(client, ddsd.WithNamespace(ns), ddsd.WithTags(tags))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create statsd client: %w", err)
 	}
 
 	return &dogstatsd{ns, tags, a}, nil
