@@ -6,18 +6,18 @@ import (
 	"log"
 	"time"
 
-	ddsd "github.com/DataDog/datadog-go/v5/statsd"
+	datadog "github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/redsift/go-errs"
 )
 
 type dogstatsd struct {
 	ns   string
 	tags []string
-	a    *ddsd.Client
+	a    *datadog.Client
 }
 
 func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
-	a, err := ddsd.New(fmt.Sprintf("%s:%d", host, port), ddsd.WithNamespace(ns), ddsd.WithTags(tags))
+	a, err := datadog.New(fmt.Sprintf("%s:%d", host, port), datadog.WithNamespace(ns), datadog.WithTags(tags))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create statsd client: %w", err)
 	}
@@ -25,8 +25,8 @@ func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, 
 	return &dogstatsd{ns, tags, a}, nil
 }
 
-func NewWithDogClient(client *ddsd.Client, ns string, tags ...string) (Collector, error) {
-	a, err := ddsd.CloneWithExtraOptions(client, ddsd.WithNamespace(ns), ddsd.WithTags(tags))
+func NewWithDogClient(client *datadog.Client, ns string, tags ...string) (Collector, error) {
+	a, err := datadog.CloneWithExtraOptions(client, datadog.WithNamespace(ns), datadog.WithTags(tags))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create statsd client: %w", err)
 	}
@@ -48,16 +48,16 @@ const (
 // Use source string to identify the source of the event.
 // Set low to true if the event has a low priority.
 func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
-	ev := ddsd.NewEvent(title, text)
+	ev := datadog.NewEvent(title, text)
 	switch level {
 	case Success:
-		ev.AlertType = ddsd.Success
+		ev.AlertType = datadog.Success
 	case Warning:
-		ev.AlertType = ddsd.Warning
+		ev.AlertType = datadog.Warning
 	case Error:
-		ev.AlertType = ddsd.Error
+		ev.AlertType = datadog.Error
 	case Info:
-		ev.AlertType = ddsd.Info
+		ev.AlertType = datadog.Info
 	}
 
 	if aggregation != "" {
@@ -69,7 +69,7 @@ func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation str
 	}
 
 	if low {
-		ev.Priority = ddsd.Low
+		ev.Priority = datadog.Low
 	}
 
 	if len(tags) == 0 {
