@@ -114,12 +114,14 @@ func (d *dogstatsd) Error(err error, tags ...string) {
 }
 
 func (d *dogstatsd) Count(stat string, count float64, tags ...string) {
+	log.Println("Count", stat, tags)
 	if err := d.a.Count(stat, int64(count), tags, 1); err != nil {
 		log.Printf("Unable to send stats data: %s", err)
 	}
 }
 
 func (d *dogstatsd) Gauge(stat string, value float64, tags ...string) {
+	log.Println("Guage", stat, tags)
 	if err := d.a.Gauge(stat, value, tags, 1); err != nil {
 		log.Printf("Unable to send stats data: %s", err)
 	}

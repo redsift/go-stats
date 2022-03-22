@@ -4,6 +4,8 @@
 package statsd
 
 import (
+	"log"
+
 	env "github.com/redsift/go-cfg"
 	"github.com/redsift/go-stats/stats"
 )
@@ -47,6 +49,8 @@ func New(opts ...Option) stats.Collector {
 
 	collector, err := stats.NewDogstatsD(cfg.host, cfg.port, cfg.namespace, cfg.tags...)
 	if err != nil {
+		log.SetFlags(log.Lshortfile)
+		log.Println("discarding stats")
 		return stats.NewDiscardCollector()
 	}
 
