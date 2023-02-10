@@ -11,27 +11,26 @@ import (
 )
 
 type dogstatsd struct {
-	ns   string
-	tags []string
-	a    *datadog.Client
+	ns string
+	a  *datadog.Client
 }
 
 func NewDogstatsD(host string, port int, ns string, tags ...string) (Collector, error) {
-	a, err := datadog.New(fmt.Sprintf("%s:%d", host, port), datadog.WithNamespace(ns), datadog.WithTags(tags))
+	a, err := datadog.New(fmt.Sprintf("%s:%d", host, port), datadog.WithNamespace(ns))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create statsd client: %w", err)
 	}
 
-	return &dogstatsd{ns, tags, a}, nil
+	return (&dogstatsd{ns, a}).With(tags...), nil
 }
 
 func NewWithDogClient(client *datadog.Client, ns string, tags ...string) (Collector, error) {
-	a, err := datadog.CloneWithExtraOptions(client, datadog.WithNamespace(ns), datadog.WithTags(tags))
+	a, err := datadog.CloneWithExtraOptions(client, datadog.WithNamespace(ns))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create statsd client: %w", err)
 	}
 
-	return &dogstatsd{ns, tags, a}, nil
+	return (&dogstatsd{ns, a}).With(tags...), nil
 }
 
 type EventLevel int
@@ -142,9 +141,17 @@ func (d *dogstatsd) Close() {
 }
 
 func (d *dogstatsd) Tags() []string {
-	return d.tags
+	return nil
+}
+
+func (d *dogstatsd) Parent() Collector {
+	return nil
 }
 
 func (d *dogstatsd) With(tags ...string) Collector {
 	return NewWithCollector(d, tags...)
+}
+
+func (d *dogstatsd) WithoutTags() Collector {
+	return d
 }

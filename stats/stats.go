@@ -30,7 +30,11 @@ type Collector interface {
 
 	Tags() []string
 
+	// return the parent collector or nil
+	Parent() Collector
+
 	With(...string) Collector
+	WithoutTags() Collector
 }
 
 type contextKey struct {
@@ -66,9 +70,12 @@ func (*discardCollector) Timing(_ string, _ time.Duration, _ ...string) {}
 func (*discardCollector) Histogram(_ string, _ float64, _ ...string)    {}
 func (*discardCollector) Close()                                        {}
 func (*discardCollector) Tags() []string                                { return nil }
+func (*discardCollector) Parent() Collector                             { return nil }
 func (dc *discardCollector) With(...string) Collector                   { return dc }
+func (dc *discardCollector) WithoutTags() Collector                     { return dc }
 
 // Safe for concurrent use.
+//
 //nolint:gochecknoglobals
 var replacer = strings.NewReplacer(" ", "_", ".", "_")
 
@@ -81,9 +88,11 @@ type withCollector struct {
 }
 
 func NewWithCollector(c Collector, tags ...string) Collector {
+	base := c.WithoutTags()
+
 	return &withCollector{
-		tags: tags,
-		c:    c,
+		tags: append(c.Tags(), tags...),
+		c:    base,
 	}
 }
 
@@ -121,6 +130,10 @@ func (wc *withCollector) Close() {
 	wc.c.Close()
 }
 
+func (wc *withCollector) Parent() Collector {
+	return wc.c
+}
+
 func (wc *withCollector) Tags() []string {
 	ot := wc.c.Tags()
 	t := make([]string, 0, len(wc.tags)+len(ot))
@@ -130,4 +143,8 @@ func (wc *withCollector) Tags() []string {
 
 func (wc *withCollector) With(tags ...string) Collector {
 	return NewWithCollector(wc, tags...)
+}
+
+func (wc *withCollector) WithoutTags() Collector {
+	return wc.c.WithoutTags()
 }
