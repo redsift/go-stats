@@ -30,7 +30,7 @@ func TestWebsocket(t *testing.T) {
 	require.NoError(t, err, "http listener failed")
 
 	go func() {
-		server.Serve(l)
+		_ = server.Serve(l)
 	}()
 	defer server.Close()
 
