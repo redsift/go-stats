@@ -65,11 +65,3 @@ func ByName(nameFilter string) router.Rule {
 		},
 	)
 }
-
-func ByNameFold(nameFilter string) router.Rule {
-	return ByFn(
-		func(name string, tags []string) bool {
-			return strings.EqualFold(name, nameFilter)
-		},
-	)
-}

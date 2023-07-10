@@ -13,13 +13,6 @@ func TestByName(t *testing.T) {
 	assert.False(t, byName.Match("Test", nil), "did match when not expected")
 }
 
-func TestByNameFold(t *testing.T) {
-	byName := rules.ByNameFold("test")
-	assert.True(t, byName.Match("test", nil), "did not match")
-	assert.True(t, byName.Match("Test", nil), "did not match")
-	assert.False(t, byName.Match("notTest", nil), "did match when not expected")
-}
-
 func TestNot(t *testing.T) {
 	byName := rules.ByName("test")
 	notByName := byName.Not()
