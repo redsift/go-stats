@@ -20,9 +20,6 @@ func All(rules ...router.Rule) router.Rule {
 
 func Any(rules ...router.Rule) router.Rule {
 	return ByFn(func(name string, tags []string) bool {
-		if len(rules) == 0 {
-			return true
-		}
 		for _, rule := range rules {
 			if rule.Match(name, tags) {
 				return true
