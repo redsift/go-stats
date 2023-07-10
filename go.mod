@@ -6,7 +6,6 @@ require (
 	github.com/DataDog/datadog-go/v5 v5.1.0
 	github.com/gobwas/ws v1.2.1
 	github.com/golang/mock v1.6.0
-	github.com/noxiouz/golang-generics-util v0.1.1
 	github.com/redsift/go-cfg v0.1.0
 	github.com/redsift/go-errs v0.1.4
 	github.com/samber/lo v1.38.1

@@ -10,7 +10,6 @@ import (
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"github.com/noxiouz/golang-generics-util/xsync"
 	"github.com/redsift/go-errs"
 	"github.com/redsift/go-stats/stats"
 	"gopkg.in/launchdarkly/go-jsonstream.v1/jwriter"
@@ -19,7 +18,6 @@ import (
 type endpoint struct {
 	mux    chan []byte
 	reg    chan muxreg
-	pool   *xsync.Pool[*bytes.Buffer]
 	cancel context.CancelFunc
 }
 
@@ -31,11 +29,8 @@ type muxreg struct {
 func New(ctx context.Context) (http.Handler, stats.Collector) {
 	ctx, cancel := context.WithCancel(ctx)
 	e := &endpoint{
-		mux: make(chan []byte),
-		reg: make(chan muxreg),
-		pool: xsync.NewPool(func() *bytes.Buffer {
-			return &bytes.Buffer{}
-		}),
+		mux:    make(chan []byte),
+		reg:    make(chan muxreg),
 		cancel: cancel,
 	}
 	go e.run(ctx)
@@ -98,8 +93,7 @@ const (
 )
 
 func (e *endpoint) writeObj(name string, fn func(jwriter.ObjectState)) {
-	b := e.pool.Get()
-	b.Reset()
+	b := &bytes.Buffer{}
 	w := jwriter.NewStreamingWriter(b, 1024)
 	oo := w.Object()
 	o := oo.Name(name).Object()
@@ -108,8 +102,6 @@ func (e *endpoint) writeObj(name string, fn func(jwriter.ObjectState)) {
 	oo.End()
 	w.Flush()
 	e.mux <- b.Bytes()
-	b.Reset()
-	e.pool.Put(b)
 }
 
 func (d *endpoint) event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
