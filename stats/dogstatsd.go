@@ -46,7 +46,7 @@ const (
 // Events are aggregated on the Event Stream based on: hostname/level/source/aggregation.
 // Use source string to identify the source of the event.
 // Set low to true if the event has a low priority.
-func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
+func (d *dogstatsd) Event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
 	ev := datadog.NewEvent(title, text)
 	switch level {
 	case Success:
@@ -85,7 +85,7 @@ func (d *dogstatsd) event(level EventLevel, title, text, source, aggregation str
 }
 
 func (d *dogstatsd) Inform(title, text string, tags ...string) {
-	d.event(Info, title, text, "", "", true, tags...)
+	d.Event(Info, title, text, "", "", true, tags...)
 }
 
 func (d *dogstatsd) Error(err error, tags ...string) {
@@ -109,7 +109,7 @@ func (d *dogstatsd) Error(err error, tags ...string) {
 	}
 
 	agg := pe.Code.String()
-	d.event(Error, title, text, src, agg, false, tags...)
+	d.Event(Error, title, text, src, agg, false, tags...)
 }
 
 func (d *dogstatsd) Count(stat string, count float64, tags ...string) {

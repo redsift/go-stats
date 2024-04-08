@@ -15,6 +15,9 @@ type Collector interface {
 	// Error resulting in a notification
 	Error(error, ...string)
 
+	// Custom event
+	Event(_ EventLevel, title, text, source, aggregation string, low bool, tags ...string)
+
 	// Measure rate of events over dT, an Inc = Count(1), Dec = Count(-1)
 	Count(string, float64, ...string)
 
@@ -61,9 +64,12 @@ func CollectorFromContext(ctx context.Context) Collector {
 
 type discardCollector struct{}
 
-func NewDiscardCollector() Collector                                    { return &discardCollector{} }
-func (*discardCollector) Inform(_, _ string, _ ...string)               {}
-func (*discardCollector) Error(_ error, _ ...string)                    {}
+func NewDiscardCollector() Collector { return &discardCollector{} }
+
+func (*discardCollector) Inform(_, _ string, _ ...string)                            {}
+func (*discardCollector) Error(_ error, _ ...string)                                 {}
+func (*discardCollector) Event(_ EventLevel, _, _, _, _ string, _ bool, _ ...string) {}
+
 func (*discardCollector) Count(_ string, _ float64, _ ...string)        {}
 func (*discardCollector) Gauge(_ string, _ float64, _ ...string)        {}
 func (*discardCollector) Timing(_ string, _ time.Duration, _ ...string) {}
@@ -108,6 +114,10 @@ func (wc *withCollector) Inform(title, text string, tags ...string) {
 
 func (wc *withCollector) Error(err error, tags ...string) {
 	wc.c.Error(err, wc.allTags(tags...)...)
+}
+
+func (wc *withCollector) Event(level EventLevel, title, text, source, aggregation string, low bool, tags ...string) {
+	wc.c.Event(level, title, text, source, aggregation, low, wc.allTags(tags...)...)
 }
 
 func (wc *withCollector) Count(stat string, count float64, tags ...string) {
