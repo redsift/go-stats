@@ -10,9 +10,9 @@ import (
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+	"github.com/launchdarkly/go-jsonstream/v3/jwriter"
 	"github.com/redsift/go-errs"
 	"github.com/redsift/go-stats/stats"
-	"gopkg.in/launchdarkly/go-jsonstream.v1/jwriter"
 )
 
 type endpoint struct {

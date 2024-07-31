@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/launchdarkly/go-jsonstream.v1/jwriter"
+	"github.com/launchdarkly/go-jsonstream/v3/jwriter"
 )
 
 type Metric struct {
