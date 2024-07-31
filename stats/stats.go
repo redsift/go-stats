@@ -33,6 +33,17 @@ type Collector interface {
 	With(...string) Collector
 }
 
+type HighCardinalityCollector interface {
+	CountH(name string, value float64, low, high []string)
+	GaugeH(name string, value float64, low, high []string)
+	TimingH(name string, value time.Duration, low, high []string)
+	HistogramH(name string, value float64, low, high []string)
+	WithH(low, high []string) HighCardinalityCollector
+
+	High() Collector
+	Low() Collector
+}
+
 type contextKey struct {
 	v string
 }
@@ -69,6 +80,7 @@ func (*discardCollector) Tags() []string                                { return
 func (dc *discardCollector) With(...string) Collector                   { return dc }
 
 // Safe for concurrent use.
+//
 //nolint:gochecknoglobals
 var replacer = strings.NewReplacer(" ", "_", ".", "_")
 
