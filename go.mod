@@ -26,5 +26,5 @@ require (
 	github.com/redsift/go-foodfans v1.0.4 // indirect
 	github.com/tinylib/msgp v1.1.5 // indirect
 	golang.org/x/sys v0.8.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
