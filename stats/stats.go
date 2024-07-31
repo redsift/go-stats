@@ -39,6 +39,9 @@ type HighCardinalityCollector interface {
 	TimingH(name string, value time.Duration, low, high []string)
 	HistogramH(name string, value float64, low, high []string)
 	WithH(low, high []string) HighCardinalityCollector
+
+	High() Collector
+	Low() Collector
 }
 
 type contextKey struct {

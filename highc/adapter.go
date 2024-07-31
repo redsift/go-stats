@@ -6,7 +6,7 @@ import (
 	"github.com/redsift/go-stats/stats"
 )
 
-func New(low, high stats.Collector) stats.HighCardinalityCollector {
+func New(low, high stats.Collector) *Collector {
 	return &Collector{
 		low:  low,
 		high: high,
@@ -88,4 +88,12 @@ func (s *Collector) With(tags ...string) stats.Collector {
 		low:  s.low.With(tags...),
 		high: s.high.With(tags...),
 	}
+}
+
+func (s *Collector) High() stats.Collector {
+	return s.high
+}
+
+func (s *Collector) Low() stats.Collector {
+	return s.low
 }
