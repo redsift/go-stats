@@ -3,10 +3,10 @@ package router_test
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/redsift/go-stats/router"
 	"github.com/redsift/go-stats/router/rules"
 	"github.com/redsift/go-stats/stats"
+	"go.uber.org/mock/gomock"
 )
 
 func TestRouter(t *testing.T) {
