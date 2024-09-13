@@ -17,14 +17,14 @@ type Adapter struct {
 	stats.HighCardinalityCollector
 }
 
-func (s *Adapter) Inform(title, text string, ts ...tags.Tag) {
-	s.Low().Inform(title, text, tags.List(ts).Low()...)
-	s.High().Inform(title, text, tags.List(ts).All()...)
+func (s *Adapter) Inform(title, text string, tags ...string) {
+	s.Low().Inform(title, text, tags...)
+	s.High().Inform(title, text, tags...)
 }
 
-func (s *Adapter) Error(err error, ts ...tags.Tag) {
-	s.Low().Error(err, tags.List(ts).Low()...)
-	s.High().Error(err, tags.List(ts).All()...)
+func (s *Adapter) Error(err error, tags ...string) {
+	s.Low().Error(err, tags...)
+	s.High().Error(err, tags...)
 }
 
 func (s *Adapter) Count(stat string, value float64, ts ...string) {
