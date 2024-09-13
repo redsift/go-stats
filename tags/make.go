@@ -14,6 +14,10 @@ func String(key, value string) Low {
 type L = Low
 type H = High
 
+func D(low, high string) Dual {
+	return Dual{low, high}
+}
+
 func LowSlice[S ~string](ins ...S) (o []Low) {
 	o = make([]Low, len(ins))
 	for i, in := range ins {
