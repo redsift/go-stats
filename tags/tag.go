@@ -12,6 +12,12 @@ func (d Dual) AddTo(tags [2][]string) [2][]string {
 	return tags
 }
 
+type Empty struct{}
+
+func (Empty) AddTo(tags [2][]string) [2][]string {
+	return tags
+}
+
 type High string
 
 func (h High) AddTo(tags [2][]string) [2][]string {
