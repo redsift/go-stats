@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 	"time"
+
+	"github.com/redsift/go-stats/tags"
 )
 
 // Tags should use a key:value format
@@ -34,11 +36,11 @@ type Collector interface {
 }
 
 type HighCardinalityCollector interface {
-	CountH(name string, value float64, low, high []string)
-	GaugeH(name string, value float64, low, high []string)
-	TimingH(name string, value time.Duration, low, high []string)
-	HistogramH(name string, value float64, low, high []string)
-	WithH(low, high []string) HighCardinalityCollector
+	CountH(name string, value float64, tags ...tags.Tag)
+	GaugeH(name string, value float64, tags ...tags.Tag)
+	TimingH(name string, value time.Duration, tags ...tags.Tag)
+	HistogramH(name string, value float64, tags ...tags.Tag)
+	WithH(tags ...tags.Tag) HighCardinalityCollector
 
 	High() Collector
 	Low() Collector

@@ -10,6 +10,31 @@ func (t List) Get() [2][]string {
 	return out
 }
 
+func (t *List) Add(ts ...Tag) {
+	*t = append(*t, ts...)
+}
+
+func (t *List) AddHigh(s ...string) {
+	t.H(s...)
+}
+
+func (t *List) AddLow(s ...string) {
+	t.L(s...)
+}
+
+func (t *List) H(s ...string) {
+	*t = append(*t, HighList(s...)...)
+}
+
+func (t *List) L(s ...string) {
+	*t = append(*t, LowList(s...)...)
+}
+
+func (t List) All() []string {
+	all := t.Get()
+	return append(all[0], all[1]...)
+}
+
 func (t List) Low() []string {
 	return t.Get()[0]
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/redsift/go-stats/stats"
+	"github.com/redsift/go-stats/tags"
 )
 
 func New(low, high stats.Collector) *Collector {
@@ -17,30 +18,30 @@ type Collector struct {
 	low, high stats.Collector
 }
 
-func (c *Collector) CountH(stat string, value float64, low, high []string) {
-	c.low.Count(stat, value, low...)
-	c.high.Count(stat, value, append(low, high...)...)
+func (c *Collector) CountH(stat string, value float64, ts ...tags.Tag) {
+	c.low.Count(stat, value, tags.List(ts).Low()...)
+	c.high.Count(stat, value, tags.List(ts).All()...)
 }
 
-func (c *Collector) GaugeH(stat string, value float64, low, high []string) {
-	c.low.Gauge(stat, value, low...)
-	c.high.Gauge(stat, value, append(low, high...)...)
+func (c *Collector) GaugeH(stat string, value float64, ts ...tags.Tag) {
+	c.low.Gauge(stat, value, tags.List(ts).Low()...)
+	c.high.Gauge(stat, value, tags.List(ts).All()...)
 }
 
-func (c *Collector) TimingH(stat string, value time.Duration, low, high []string) {
-	c.low.Timing(stat, value, low...)
-	c.high.Timing(stat, value, append(low, high...)...)
+func (c *Collector) TimingH(stat string, value time.Duration, ts ...tags.Tag) {
+	c.low.Timing(stat, value, tags.List(ts).Low()...)
+	c.high.Timing(stat, value, tags.List(ts).All()...)
 }
 
-func (c *Collector) HistogramH(stat string, value float64, low, high []string) {
-	c.low.Histogram(stat, value, low...)
-	c.high.Histogram(stat, value, append(low, high...)...)
+func (c *Collector) HistogramH(stat string, value float64, ts ...tags.Tag) {
+	c.low.Histogram(stat, value, tags.List(ts).Low()...)
+	c.high.Histogram(stat, value, tags.List(ts).All()...)
 }
 
-func (s *Collector) WithH(low, high []string) stats.HighCardinalityCollector {
+func (s *Collector) WithH(ts ...tags.Tag) stats.HighCardinalityCollector {
 	return &Collector{
-		low:  s.low.With(low...),
-		high: s.high.With(low...).With(high...),
+		low:  s.low.With(tags.List(ts).Low()...),
+		high: s.high.With(tags.List(ts).All()...),
 	}
 }
 
