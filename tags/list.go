@@ -42,3 +42,11 @@ func (t List) Low() []string {
 func (t List) High() []string {
 	return t.Get()[1]
 }
+
+// AddTo implements Tag
+func (t List) AddTo(tags [2][]string) [2][]string {
+	for _, e := range t {
+		e.AddTo(tags)
+	}
+	return tags
+}
