@@ -143,3 +143,7 @@ func (wc *withCollector) Tags() []string {
 func (wc *withCollector) With(tags ...string) Collector {
 	return NewWithCollector(wc, tags...)
 }
+
+func (wc *withCollector) Unwrap() Collector {
+	return wc.c
+}

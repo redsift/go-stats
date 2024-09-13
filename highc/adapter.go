@@ -97,3 +97,13 @@ func (s *Collector) High() stats.Collector {
 func (s *Collector) Low() stats.Collector {
 	return s.low
 }
+
+func (s *Collector) Unwrap() stats.HighCardinalityCollector {
+	if nextH, nextL := stats.Unwrap(s.high), stats.Unwrap(s.low); nextH != s.high && nextL != s.low {
+		return &Collector{
+			high: stats.Unwrap(s.high),
+			low:  stats.Unwrap(s.low),
+		}
+	}
+	return s
+}
