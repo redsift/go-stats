@@ -7,6 +7,13 @@ func Bool(key string, value bool) Low {
 	return Low(key + ":false")
 }
 
+func Error(key string, err error) Tag {
+	if err != nil {
+		return High(key + ":" + err.Error())
+	}
+	return Empty{}
+}
+
 func String(key, value string) Low {
 	return Low(key + ":" + value)
 }
@@ -16,6 +23,10 @@ type H = High
 
 func D(low, high string) Dual {
 	return Dual{low, high}
+}
+
+func E() Empty {
+	return Empty{}
 }
 
 func LowSlice[S ~string](ins ...S) (o []Low) {
