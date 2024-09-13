@@ -6,104 +6,50 @@ import (
 	"github.com/redsift/go-stats/stats"
 )
 
-func New(low, high stats.Collector) *Collector {
-	return &Collector{
-		low:  low,
-		high: high,
+func NewAdapter(hc stats.HighCardinalityCollector) *Adapter {
+	return &Adapter{
+		HighCardinalityCollector: hc,
 	}
 }
 
-type Collector struct {
-	low, high stats.Collector
+type Adapter struct {
+	stats.HighCardinalityCollector
 }
 
-func (c *Collector) CountH(stat string, value float64, low, high []string) {
-	c.low.Count(stat, value, low...)
-	c.high.Count(stat, value, append(low, high...)...)
+func (s *Adapter) Inform(title, text string, tags ...string) {
+	s.Low().Inform(title, text, tags...)
+	s.High().Inform(title, text, tags...)
 }
 
-func (c *Collector) GaugeH(stat string, value float64, low, high []string) {
-	c.low.Gauge(stat, value, low...)
-	c.high.Gauge(stat, value, append(low, high...)...)
+func (s *Adapter) Error(err error, tags ...string) {
+	s.Low().Error(err, tags...)
+	s.High().Error(err, tags...)
 }
 
-func (c *Collector) TimingH(stat string, value time.Duration, low, high []string) {
-	c.low.Timing(stat, value, low...)
-	c.high.Timing(stat, value, append(low, high...)...)
+func (s *Adapter) Count(stat string, value float64, tags ...string) {
+	s.CountH(stat, value, tags, nil)
 }
 
-func (c *Collector) HistogramH(stat string, value float64, low, high []string) {
-	c.low.Histogram(stat, value, low...)
-	c.high.Histogram(stat, value, append(low, high...)...)
+func (s *Adapter) Gauge(stat string, value float64, tags ...string) {
+	s.GaugeH(stat, value, tags, nil)
 }
 
-func (s *Collector) WithH(low, high []string) stats.HighCardinalityCollector {
-	return &Collector{
-		low:  s.low.With(low...),
-		high: s.high.With(low...).With(high...),
-	}
+func (s *Adapter) Timing(stat string, value time.Duration, tags ...string) {
+	s.TimingH(stat, value, tags, nil)
 }
 
-func (s *Collector) Inform(title, text string, tags ...string) {
-	s.low.Inform(title, text, tags...)
-	s.high.Inform(title, text, tags...)
+func (s *Adapter) Histogram(stat string, value float64, tags ...string) {
+	s.HistogramH(stat, value, tags, nil)
 }
 
-func (s *Collector) Error(err error, tags ...string) {
-	s.low.Error(err, tags...)
-	s.high.Error(err, tags...)
+func (s *Adapter) Unwrap() stats.HighCardinalityCollector {
+	return s.HighCardinalityCollector
 }
 
-func (s *Collector) Count(stat string, value float64, tags ...string) {
-	s.low.Count(stat, value, tags...)
-	s.high.Count(stat, value, tags...)
+func (s *Adapter) With(tags ...string) *Adapter {
+	return NewAdapter(s.HighCardinalityCollector.WithH(tags, nil))
 }
 
-func (s *Collector) Gauge(stat string, value float64, tags ...string) {
-	s.low.Gauge(stat, value, tags...)
-	s.high.Gauge(stat, value, tags...)
-}
-
-func (s *Collector) Timing(stat string, value time.Duration, tags ...string) {
-	s.low.Timing(stat, value, tags...)
-	s.high.Timing(stat, value, tags...)
-}
-
-func (s *Collector) Histogram(stat string, value float64, tags ...string) {
-	s.low.Histogram(stat, value, tags...)
-	s.high.Histogram(stat, value, tags...)
-}
-
-func (s *Collector) Close() {
-	s.low.Close()
-	s.high.Close()
-}
-
-func (s *Collector) Tags() []string {
-	return nil
-}
-
-func (s *Collector) With(tags ...string) stats.Collector {
-	return &Collector{
-		low:  s.low.With(tags...),
-		high: s.high.With(tags...),
-	}
-}
-
-func (s *Collector) High() stats.Collector {
-	return s.high
-}
-
-func (s *Collector) Low() stats.Collector {
-	return s.low
-}
-
-func (s *Collector) Unwrap() stats.HighCardinalityCollector {
-	if nextH, nextL := stats.Unwrap(s.high), stats.Unwrap(s.low); nextH != s.high && nextL != s.low {
-		return &Collector{
-			high: stats.Unwrap(s.high),
-			low:  stats.Unwrap(s.low),
-		}
-	}
-	return s
+func (s *Adapter) WithH(low, high []string) *Adapter {
+	return NewAdapter(s.HighCardinalityCollector.WithH(low, high))
 }
