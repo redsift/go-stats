@@ -96,3 +96,14 @@ func (s *router) Tags() []string {
 func (s *router) With(tags ...string) stats.Collector {
 	return stats.NewWithCollector(s, tags...)
 }
+
+func (s *router) Unwrap() stats.Collector {
+	r := &router{}
+	for _, route := range s.routes {
+		r.routes = append(r.routes, Route{
+			Rule:   route.Rule,
+			Target: stats.Unwrap(route.Target),
+		})
+	}
+	return r
+}
